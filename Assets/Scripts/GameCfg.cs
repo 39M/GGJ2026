@@ -67,15 +67,21 @@ namespace GGJ
         [LabelText("发射面具速度")]
         public float BulletSpeed;
         
-        [TabGroup("面具配置")]
+        [TabGroup("基础配置")]
         [Header("吃掉玩家")]
         [LabelText("偷分比例(0~1，从被吃者扣取并加给吃者)")]
         [Range(0f, 1f)]
         public float EatStealRatio = 0.5f;
+        
+        [TabGroup("基础配置")]
         [LabelText("吃人者眩晕时间(秒)")]
         public float EatStunDuration = 1.5f;
+        
+        [TabGroup("基础配置")]
         [LabelText("被吃者弹开距离(格，防止短时间反复触发)")]
         public float EatPushDistance = 2f;
+        
+        [TabGroup("面具配置")]
         public Dictionary<MaskType, MaskCfg> MaskDefine;
         
         [TabGroup("事件配置")]
