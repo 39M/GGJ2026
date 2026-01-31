@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -13,6 +12,17 @@ namespace GGJ
         [HideInInspector]
         public PlayerController owner;
 
+        /// <summary> 发射者：谁发射的这枚面具，撞墙后也不清除。仅在该时间内禁止发射者拾取，避免墙边立刻捡回。 </summary>
+        private PlayerController _firedBy;
+        [Tooltip("发射者在此时间内不能拾取该面具(秒)，避免墙边立刻捡回；超时后可捡。掉落的面具 _firedBy 为 null 不受影响。")]
+        public static float FiredByPickupBlockDuration = 2f;
+
+        [Tooltip("大碰撞体(发射时命中玩家用)，不填则只有根上的小碰撞")]
+        public Collider2D largeCollider;
+
+        private bool _isFired;
+        private float _firedTime = -999f;
+
         private void Awake()
         {
             Init(mask);
@@ -24,49 +34,60 @@ namespace GGJ
             mainSprite.color = mask.GetCfg().TestColor;
             rig.linearVelocity = speed;
             owner = own;
+            _isFired = speed.sqrMagnitude > 0.01f;
+            if (_isFired)
+            {
+                _firedTime = Time.time;
+                _firedBy = own; // 记录发射者，撞墙后也不清除，防止发射者再捡回
+            }
+            if (largeCollider != null)
+                largeCollider.enabled = _isFired;
         }
-        
+
         private void OnTriggerEnter2D(Collider2D other)
         {
-            Debug.Log("MaskObject Triggered: " + other.name);
-            
-            // 如果碰到的物体Tag带有Mask则忽略
+            OnColliderTriggered(other, false);
+        }
+
+        public void OnColliderTriggered(Collider2D other, bool isLargeCollider)
+        {
             if (other.CompareTag("Mask"))
-            {
                 return;
-            }
-            
+
             var coin = other.GetComponentInParent<Coin>();
             if (coin != null)
-            {
-                Debug.Log($"Mask {mask} hit Coin");
                 return;
-            }
 
-            // 打印面具碰墙停下
             if (other.CompareTag("Wall"))
             {
-                rig.linearVelocity = Vector2.zero;
-                owner = null;
+                if (!isLargeCollider)
+                {
+                    rig.linearVelocity = Vector2.zero;
+                    owner = null;
+                    _isFired = false;
+                    if (largeCollider != null)
+                        largeCollider.enabled = false;
+                }
                 return;
             }
 
-
             var pc = other.GetComponentInParent<PlayerController>();
-            
-            if (pc != null && pc != owner)
-            {
-                // 打印面具被哪个玩家吃了
-                Debug.Log($"Mask {mask} eaten by Player {pc.PlayerIdx}");
-                pc.GetMask(mask);
-            }
+            if (pc == null)
+                return;
+            if (pc == owner)
+                return;
+            // 发射者在 FiredByPickupBlockDuration 秒内不能拾取，避免墙边立刻捡回；超时后可捡。掉落的面具 _firedBy 为 null 不受影响。
+            if (pc == _firedBy && Time.time - _firedTime < FiredByPickupBlockDuration)
+                return;
+            if (Time.time - _firedTime < 0.3f)
+                return;
 
-            if (pc == null || pc != owner)
-            {
-                //打印丢出去的面具碰到了其他玩家
-                Debug.Log($"Mask {mask} hit Player {(pc != null ? pc.PlayerIdx.ToString() : "None")}");
-                Destroy(gameObject);
-            }
+            bool shouldHit = isLargeCollider ? _isFired : !_isFired;
+            if (!shouldHit)
+                return;
+
+            pc.GetMask(mask);
+            Destroy(gameObject);
         }
     }
 }

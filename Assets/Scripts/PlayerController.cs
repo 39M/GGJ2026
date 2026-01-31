@@ -265,6 +265,7 @@ namespace GGJ
         {
             if (currentMask == MaskType.None) return;
             var mask = Instantiate(GameCfg.Instance.MaskPrefab, transform.position, Quaternion.identity).GetComponent<MaskObject>();
+            mask.owner = this;
             mask.Init(currentMask, curDirection.GetVec() * GameCfg.Instance.BulletSpeed, this);
             RemoveCurMask();
         }
