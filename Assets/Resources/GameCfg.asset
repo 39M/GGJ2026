@@ -15,10 +15,7 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects:
-    - {fileID: -7136673967338131891, guid: 79291029de6e5cd41ac1e9455f48d456, type: 3}
-    - {fileID: 4143598101872524988, guid: 9be6d50e2f328ac45a93376ab54db581, type: 3}
-    - {fileID: -4115059098874668589, guid: 705193d5e76cd2f468553c4d8b5ed36b, type: 3}
+    ReferencedUnityObjects: []
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -145,8 +142,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: MaskSprite
-      Entry: 10
-      Data: 0
+      Entry: 6
+      Data: 
     - Name: MaskIcon
       Entry: 6
       Data: 
@@ -224,8 +221,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: MaskSprite
-      Entry: 10
-      Data: 1
+      Entry: 6
+      Data: 
     - Name: MaskIcon
       Entry: 6
       Data: 
@@ -297,8 +294,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: MaskSprite
-      Entry: 10
-      Data: 2
+      Entry: 6
+      Data: 
     - Name: MaskIcon
       Entry: 6
       Data: 
@@ -332,10 +329,10 @@ MonoBehaviour:
       Data: false
     - Name: DropCoinInterval
       Entry: 4
-      Data: 10
+      Data: 3
     - Name: DropCoinAmount
       Entry: 4
-      Data: 30
+      Data: 5
     - Name: 
       Entry: 8
       Data: 
@@ -352,6 +349,7 @@ MonoBehaviour:
   MaskPrefab: {fileID: 3275814422875547497, guid: 4fe415e934e15bb418dd79bfa9ffbc92, type: 3}
   CoinPrefab: {fileID: 8409749159196456642, guid: 1ae183a55e78bca48a7a14d907ff902a, type: 3}
   BulletSpeed: 40
+  FireMaskCooldown: 0.5
   FiredByPickupBlockDuration: 2
   EatStealRatio: 0.5
   EatStunDuration: 1.5
@@ -360,6 +358,6 @@ MonoBehaviour:
     WaveDuration: 60
     SpawnMode: 1
     FirstWaveCoins: 20
-    CoinsPerWave: 15
+    CoinsPerWave: 40
     CoinCheckRadius: 0.4
     MaxSpawnAttempts: 100
