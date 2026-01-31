@@ -110,6 +110,8 @@ namespace GGJ
         private void LateUpdate()
         {
             if (pc == null || _rect == null || _canvas == null) return;
+            var canvasRect = _canvas.transform as RectTransform;
+            if (canvasRect.lossyScale.x <= 0f || canvasRect.lossyScale.y <= 0f) return;
             var parentRect = _rect.parent as RectTransform;
             if (parentRect == null) return;
             var cam = followCamera != null ? followCamera : Camera.main;
@@ -117,7 +119,6 @@ namespace GGJ
             var worldPos = pc.transform.position + headOffset;
             var screenPos = cam.WorldToScreenPoint(worldPos);
             // Overlay + CanvasScaler 时，必须用 Canvas 根做屏幕→本地，再变换到父节点空间，否则会往左下大偏
-            var canvasRect = _canvas.transform as RectTransform;
             Camera useCamera = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : (_canvas.worldCamera != null ? _canvas.worldCamera : cam);
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, useCamera, out var canvasLocalPos);
             var worldPoint = canvasRect.TransformPoint(canvasLocalPos);
