@@ -12,6 +12,8 @@ namespace GGJ
 
         private void OnTriggerEnter2D(Collider2D other)
         {
+            // 打印日志以便调试
+            Debug.Log($"MaskColliderForwarder: Triggered by {other.name}, isLarge={isLarge}");
             var mask = GetComponentInParent<MaskObject>();
             if (mask != null)
                 mask.OnColliderTriggered(other, isLarge);
