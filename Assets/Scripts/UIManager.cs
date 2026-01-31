@@ -10,6 +10,10 @@ namespace GGJ
         public List<PlayerUI> PlayerUIList;
         public Button ReloadBtn;
         
+        [Header("游戏事件")]
+        [Tooltip("游戏事件面板")]
+        public GameEventUI gameEventUI;
+        
         [Header("结算界面")]
         [Tooltip("结算界面面板")]
         public GameResultUI gameResultUI;
@@ -23,6 +27,8 @@ namespace GGJ
         void Start()
         {
             ReloadBtn.onClick.AddListener(() => GameManager.Instance.Reload());
+            
+            gameEventUI = transform.Find("GameEventUI")?.GetComponent<GameEventUI>();
             
             gameResultUI = transform.Find("GameResultPanel")?.GetComponent<GameResultUI>();
             // 隐藏结算界面

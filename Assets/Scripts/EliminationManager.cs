@@ -325,6 +325,7 @@ namespace GGJ
             if (_alivePlayers.Count <= 1)
             {
                 GameEventManager.Instance?.StopGameEventManager();
+                UIManager.Instance.gameEventUI?.gameObject.SetActive(false);
             }
         }
         
