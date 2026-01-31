@@ -8,9 +8,11 @@ namespace GGJ
     public class InputManager : MonoSingleton<InputManager>
     {
         public InputSystem_Actions InputSystemActions;
+        public InputSystem_Controller_2 Controller2Actions;
+        public InputSystem_Controller_3 Controller3Actions;
+        public InputSystem_Controller_4 Controller4Actions;
 
         // 游戏手柄分配
-        private Dictionary<Gamepad, int> gamepadToPlayer = new Dictionary<Gamepad, int>();
         private Gamepad player1Gamepad;
         private Gamepad player2Gamepad;
         private Gamepad player3Gamepad;
@@ -24,48 +26,69 @@ namespace GGJ
         void InitInput()
         {
             InputSystemActions = new InputSystem_Actions();
-            InputSystemActions.Enable();
+            Controller2Actions = new InputSystem_Controller_2();
+            Controller3Actions = new InputSystem_Controller_3();
+            Controller4Actions = new InputSystem_Controller_4();
 
-            // 检测连接的游戏手柄并分配给玩家
-            DetectAndAssignGamepads();
+            // 检测游戏手柄并配置设备绑定
+            ConfigureDeviceBindings();
 
             // 绑定输入事件
             BindInputEvents();
         }
-
-        // 检测并分配游戏手柄给玩家
-        private void DetectAndAssignGamepads()
+        
+        /// <summary>
+        /// 检测游戏手柄并配置每个玩家的设备绑定
+        /// </summary>
+        private void ConfigureDeviceBindings()
         {
             var gamepads = Gamepad.all;
             Debug.Log($"[InputManager] 检测到 {gamepads.Count} 个游戏手柄");
 
-            // 为Player1和Player2分配游戏手柄
-            if (gamepads.Count > 0)
+            // 分配游戏手柄
+            player1Gamepad = gamepads.Count > 0 ? gamepads[0] : null;
+            player2Gamepad = gamepads.Count > 1 ? gamepads[1] : null;
+            player3Gamepad = gamepads.Count > 2 ? gamepads[2] : null;
+            player4Gamepad = gamepads.Count > 3 ? gamepads[3] : null;
+
+            // Player1：键盘 + 第一个游戏手柄
+            if (player1Gamepad != null)
             {
-                player1Gamepad = gamepads[0];
-                gamepadToPlayer[player1Gamepad] = 0;
+                InputSystemActions.devices = new UnityEngine.InputSystem.InputDevice[] { Keyboard.current, player1Gamepad };
                 Debug.Log($"[InputManager] 游戏手柄1 '{player1Gamepad.displayName}' (ID: {player1Gamepad.deviceId}) 分配给 Player1");
             }
-
-            if (gamepads.Count > 1)
+            else
             {
-                player2Gamepad = gamepads[1];
-                gamepadToPlayer[player2Gamepad] = 1;
+                InputSystemActions.devices = new UnityEngine.InputSystem.InputDevice[] { Keyboard.current };
+            }
+            InputSystemActions.Enable();
+
+            // Player2：键盘 + 第二个游戏手柄
+            if (player2Gamepad != null)
+            {
+                Controller2Actions.devices = new UnityEngine.InputSystem.InputDevice[] { Keyboard.current, player2Gamepad };
                 Debug.Log($"[InputManager] 游戏手柄2 '{player2Gamepad.displayName}' (ID: {player2Gamepad.deviceId}) 分配给 Player2");
             }
-
-            if (gamepads.Count > 2)
+            else
             {
-                player3Gamepad = gamepads[2];
-                gamepadToPlayer[player3Gamepad] = 2;
-                Debug.Log($"[InputManager] 游戏手柄2 '{player3Gamepad.displayName}' (ID: {player3Gamepad.deviceId}) 分配给 Player3");
+                Controller2Actions.devices = new UnityEngine.InputSystem.InputDevice[] { Keyboard.current };
+            }
+            Controller2Actions.Enable();
+
+            // Player3：第三个游戏手柄
+            if (player3Gamepad != null)
+            {
+                Controller3Actions.devices = new UnityEngine.InputSystem.InputDevice[] { player3Gamepad };
+                Controller3Actions.Enable();
+                Debug.Log($"[InputManager] 游戏手柄3 '{player3Gamepad.displayName}' (ID: {player3Gamepad.deviceId}) 分配给 Player3");
             }
 
-            if (gamepads.Count > 3)
+            // Player4：第四个游戏手柄
+            if (player4Gamepad != null)
             {
-                player4Gamepad = gamepads[3];
-                gamepadToPlayer[player4Gamepad] = 3;
-                Debug.Log($"[InputManager] 游戏手柄2 '{player4Gamepad.displayName}' (ID: {player4Gamepad.deviceId}) 分配给 Player4");
+                Controller4Actions.devices = new UnityEngine.InputSystem.InputDevice[] { player4Gamepad };
+                Controller4Actions.Enable();
+                Debug.Log($"[InputManager] 游戏手柄4 '{player4Gamepad.displayName}' (ID: {player4Gamepad.deviceId}) 分配给 Player4");
             }
         }
 
@@ -79,81 +102,87 @@ namespace GGJ
             InputSystemActions.Player_1.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 0);
             InputSystemActions.Player_1.Attack.started += ctx => OnAttackInput(ctx, 0);
             InputSystemActions.Player_1.Switch.started += ctx => OnSwitchInput(ctx, 0);
+            InputSystemActions.Player_1.Move2D.performed += ctx => OnMove2DInput(ctx, 0);
 
             // Player2 输入绑定（键盘 + 游戏手柄2）
-            InputSystemActions.Player_2.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 1);
-            InputSystemActions.Player_2.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 1);
-            InputSystemActions.Player_2.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 1);
-            InputSystemActions.Player_2.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 1);
-            InputSystemActions.Player_2.Attack.started += ctx => OnAttackInput(ctx, 1);
-            InputSystemActions.Player_2.Switch.started += ctx => OnSwitchInput(ctx, 1);
+            Controller2Actions.Player.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 1);
+            Controller2Actions.Player.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 1);
+            Controller2Actions.Player.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 1);
+            Controller2Actions.Player.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 1);
+            Controller2Actions.Player.Attack.started += ctx => OnAttackInput(ctx, 1);
+            Controller2Actions.Player.Switch.started += ctx => OnSwitchInput(ctx, 1);
+            Controller2Actions.Player.Move2D.performed += ctx => OnMove2DInput(ctx, 1);
 
-            InputSystemActions.Player_3.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 2);
-            InputSystemActions.Player_3.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 2);
-            InputSystemActions.Player_3.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 2);
-            InputSystemActions.Player_3.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 2);
-            InputSystemActions.Player_3.Attack.started += ctx => OnAttackInput(ctx, 2);
-            InputSystemActions.Player_3.Switch.started += ctx => OnSwitchInput(ctx, 2);
+            // Player3 输入绑定（游戏手柄3）
+            if (player3Gamepad != null)
+            {
+                Controller3Actions.Player.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 2);
+                Controller3Actions.Player.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 2);
+                Controller3Actions.Player.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 2);
+                Controller3Actions.Player.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 2);
+                Controller3Actions.Player.Attack.started += ctx => OnAttackInput(ctx, 2);
+                Controller3Actions.Player.Switch.started += ctx => OnSwitchInput(ctx, 2);
+                Controller3Actions.Player.Move2D.performed += ctx => OnMove2DInput(ctx, 2);
+            }
 
-            InputSystemActions.Player_4.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 3);
-            InputSystemActions.Player_4.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 3);
-            InputSystemActions.Player_4.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 3);
-            InputSystemActions.Player_4.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 3);
-            InputSystemActions.Player_4.Attack.started += ctx => OnAttackInput(ctx, 3);
-            InputSystemActions.Player_4.Switch.started += ctx => OnSwitchInput(ctx, 3);
+            // Player4 输入绑定（游戏手柄4）
+            if (player4Gamepad != null)
+            {
+                Controller4Actions.Player.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 3);
+                Controller4Actions.Player.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 3);
+                Controller4Actions.Player.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 3);
+                Controller4Actions.Player.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 3);
+                Controller4Actions.Player.Attack.started += ctx => OnAttackInput(ctx, 3);
+                Controller4Actions.Player.Switch.started += ctx => OnSwitchInput(ctx, 3);
+                Controller4Actions.Player.Move2D.performed += ctx => OnMove2DInput(ctx, 3);
+            }
         }
 
         // 移动输入处理
         private void OnMoveInput(InputAction.CallbackContext ctx, Direction direction, int playerIndex)
         {
-            // 检查是否来自正确的设备
-            if (IsValidInputForPlayer(ctx, playerIndex))
-            {
-                OnMovePerform(direction, playerIndex);
-            }
+            OnMovePerform(direction, playerIndex);
         }
 
         // 丢面具处理
         private void OnAttackInput(InputAction.CallbackContext ctx, int playerIndex)
         {
-            if (IsValidInputForPlayer(ctx, playerIndex))
-            {
-                OnAttackStart(ctx, playerIndex);
-            }
+            OnAttackStart(ctx, playerIndex);
         }
 
         // 切换面具处理
         private void OnSwitchInput(InputAction.CallbackContext ctx, int playerIndex)
         {
-            if (IsValidInputForPlayer(ctx, playerIndex))
-            {
-                OnSwitchMask(playerIndex);
-            }
+            OnSwitchMask(playerIndex);
         }
 
-        // 验证输入是否来自正确的设备
-        private bool IsValidInputForPlayer(InputAction.CallbackContext ctx, int playerIndex)
+        // 2D移动输入处理
+        private void OnMove2DInput(InputAction.CallbackContext ctx, int playerIndex)
         {
-            var device = ctx.control.device;
-
-            // 键盘输入总是有效的
-            if (device is Keyboard)
-                return true;
-
-            // 检查游戏手柄输入
-            if (device is Gamepad gamepad)
+            Vector2 moveVector = ctx.ReadValue<Vector2>();
+            
+            // 设置死区阈值，避免摇杆微小抖动
+            const float deadZone = 0.2f;
+            if (moveVector.magnitude < deadZone)
+                return;
+            
+            // 根据2D轴值确定主要移动方向
+            if (Mathf.Abs(moveVector.x) > Mathf.Abs(moveVector.y))
             {
-                if (playerIndex == 0 && gamepad == player1Gamepad)
-                    return true;
-                if (playerIndex == 1 && gamepad == player2Gamepad)
-                    return true;
-                if (playerIndex == 2 && gamepad == player3Gamepad)
-                    return true;
-                if (playerIndex == 3 && gamepad == player4Gamepad)
-                    return true;
+                // 水平移动优先
+                if (moveVector.x > 0)
+                    OnMovePerform(Direction.Right, playerIndex);
+                else if (moveVector.x < 0)
+                    OnMovePerform(Direction.Left, playerIndex);
             }
-
-            return false;
+            else if (Mathf.Abs(moveVector.y) > 0)
+            {
+                // 垂直移动优先
+                if (moveVector.y > 0)
+                    OnMovePerform(Direction.Up, playerIndex);
+                else if (moveVector.y < 0)
+                    OnMovePerform(Direction.Down, playerIndex);
+            }
         }
 
         // /// 获取连接的游戏手柄信息
@@ -192,7 +221,10 @@ namespace GGJ
 
         private void OnDestroy()
         {
-            InputSystemActions.Disable();
+            InputSystemActions?.Disable();
+            Controller2Actions?.Disable();
+            Controller3Actions?.Disable();
+            Controller4Actions?.Disable();
         }
 
         private void OnAttackStart(InputAction.CallbackContext ctx, int playerIdx)
