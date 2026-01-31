@@ -50,9 +50,30 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: 2|GGJ.MaskCfg, Assembly-CSharp
+    - Name: TestColor
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: Speed
       Entry: 4
-      Data: 10
+      Data: 5
+    - Name: EatSpeed
+      Entry: 4
+      Data: 8
     - Name: Score
       Entry: 4
       Data: 1
@@ -72,27 +93,6 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: EatSpeed
-      Entry: 4
-      Data: 10
-    - Name: TestColor
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 1
-    - Name: 
-      Entry: 4
-      Data: 1
-    - Name: 
-      Entry: 4
-      Data: 1
-    - Name: 
-      Entry: 4
-      Data: 1
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -108,9 +108,30 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: 4|GGJ.MaskCfg, Assembly-CSharp
+    - Name: TestColor
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0.9568628
+    - Name: 
+      Entry: 4
+      Data: 0.6431373
+    - Name: 
+      Entry: 4
+      Data: 0.3764706
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: Speed
       Entry: 4
-      Data: 10
+      Data: 7
+    - Name: EatSpeed
+      Entry: 4
+      Data: 12
     - Name: Score
       Entry: 4
       Data: 1
@@ -136,27 +157,6 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: EatSpeed
-      Entry: 4
-      Data: 16
-    - Name: TestColor
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0.9568628
-    - Name: 
-      Entry: 4
-      Data: 0.6431373
-    - Name: 
-      Entry: 4
-      Data: 0.3764706
-    - Name: 
-      Entry: 4
-      Data: 1
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -172,7 +172,28 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: 6|GGJ.MaskCfg, Assembly-CSharp
+    - Name: TestColor
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0.5960785
+    - Name: 
+      Entry: 4
+      Data: 0.9843138
+    - Name: 
+      Entry: 4
+      Data: 0.5960785
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: Speed
+      Entry: 4
+      Data: 5
+    - Name: EatSpeed
       Entry: 4
       Data: 8
     - Name: Score
@@ -194,27 +215,6 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: EatSpeed
-      Entry: 4
-      Data: 8
-    - Name: TestColor
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0.5960785
-    - Name: 
-      Entry: 4
-      Data: 0.9843138
-    - Name: 
-      Entry: 4
-      Data: 0.5960785
-    - Name: 
-      Entry: 4
-      Data: 1
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -230,9 +230,30 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: 8|GGJ.MaskCfg, Assembly-CSharp
+    - Name: TestColor
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0.5176471
+    - Name: 
+      Entry: 4
+      Data: 0.4392157
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: Speed
       Entry: 4
-      Data: 12
+      Data: 4
+    - Name: EatSpeed
+      Entry: 4
+      Data: 6
     - Name: Score
       Entry: 4
       Data: 1
@@ -249,27 +270,6 @@ MonoBehaviour:
     - Name: 
       Entry: 13
       Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: EatSpeed
-      Entry: 4
-      Data: 12
-    - Name: TestColor
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0.5176471
-    - Name: 
-      Entry: 4
-      Data: 0.4392157
-    - Name: 
-      Entry: 4
-      Data: 1
-    - Name: 
-      Entry: 4
-      Data: 1
     - Name: 
       Entry: 8
       Data: 
