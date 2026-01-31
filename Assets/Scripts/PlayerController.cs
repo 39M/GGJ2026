@@ -72,6 +72,52 @@ namespace GGJ
         {
             return GameCfg.Instance.GetMaskCfg(mask);
         }
+
+        /// <summary> 在给定中心附近找一个空地：该点无碰撞体，且该点周围半径内无墙，避免掉落物/面具与墙重叠。 </summary>
+        /// <param name="center">中心点</param>
+        /// <param name="wallCheckRadius">候选点周围检测墙的半径，需略大于掉落物碰撞体（如面具约 0.5）</param>
+        public static Vector2 FindNearbyEmptyPosition(Vector2 center, float wallCheckRadius = 0.5f)
+        {
+            var grid = GridSize;
+            var offsets = new[]
+            {
+                new Vector2(grid, 0), new Vector2(-grid, 0), new Vector2(0, grid), new Vector2(0, -grid),
+                new Vector2(grid, grid), new Vector2(-grid, grid), new Vector2(grid, -grid), new Vector2(-grid, -grid),
+                new Vector2(2 * grid, 0), new Vector2(-2 * grid, 0), new Vector2(0, 2 * grid), new Vector2(0, -2 * grid),
+            };
+            foreach (var off in offsets)
+            {
+                var p = center + off;
+                if (Physics2D.OverlapPoint(p)) continue;
+                if (HasWallWithinRadius(p, wallCheckRadius)) continue;
+                return p;
+            }
+            return center + new Vector2(grid, 0);
+        }
+
+        /// <summary> 该点半径内是否存在墙（Tag=Wall）。 </summary>
+        public static bool HasWallWithinRadius(Vector2 point, float radius)
+        {
+            var hits = Physics2D.OverlapCircleAll(point, radius);
+            foreach (var col in hits)
+                if (col.CompareTag("Wall")) return true;
+            return false;
+        }
+
+        /// <summary> 从 from 沿方向 dir 射线检测，maxDistance 内是否碰到墙。ignore 为 null 则不忽略任何碰撞体。 </summary>
+        public static bool HasWallInDirection(Vector2 from, Direction dir, float maxDistance, Transform ignore = null)
+        {
+            var vec = dir.GetVec();
+            if (vec.sqrMagnitude < 0.01f) return true;
+            var hits = Physics2D.RaycastAll(from, vec, maxDistance);
+            foreach (var hit in hits)
+            {
+                if (!hit.collider) continue;
+                if (ignore != null && hit.collider.transform.IsChildOf(ignore)) continue;
+                if (hit.collider.CompareTag("Wall")) return true;
+            }
+            return false;
+        }
     }
     
 
@@ -104,9 +150,16 @@ namespace GGJ
         public Direction curDirection = Direction.Up;
         [LabelText("当前得分")]
         public float curScore = 0;
+        
+        /// <summary> 是否被标记为垫底 </summary>
+        public bool IsMarked { get; private set; } = false;
+        
+        /// <summary> 是否已被淘汰 </summary>
+        public bool IsEliminated { get; private set; } = false;
 
         private float _stunEndTime;
         private float _dropCoinNextTime;
+        private float _lastFireMaskTime = -999f;
 
         public bool IsStunned => Time.time < _stunEndTime;
         public Vector2 FinalSpeed => IsStunned ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
@@ -134,26 +187,6 @@ namespace GGJ
             UpdateUI?.Invoke();
         }
 
-        /// <summary> 在玩家附近找一个空地位置（无碰撞体的点），用于掉落面具。 </summary>
-        private Vector2 FindNearbyEmptyPosition()
-        {
-            var center = (Vector2)transform.position;
-            var grid = Utils.GridSize;
-            var offsets = new[]
-            {
-                new Vector2(grid, 0), new Vector2(-grid, 0), new Vector2(0, grid), new Vector2(0, -grid),
-                new Vector2(grid, grid), new Vector2(-grid, grid), new Vector2(grid, -grid), new Vector2(-grid, -grid),
-                new Vector2(2 * grid, 0), new Vector2(-2 * grid, 0), new Vector2(0, 2 * grid), new Vector2(0, -2 * grid),
-            };
-            foreach (var off in offsets)
-            {
-                var p = center + off;
-                if (!Physics2D.OverlapPoint(p))
-                    return p;
-            }
-            return center + new Vector2(grid, 0);
-        }
-
         [LabelText("掉落面具最小距离(格)")]
         public float dropMinDistance = 3f;
         /// <summary> 找一个离玩家足够远的空位用于掉落面具，避免刚掉就被自己触发拾取。 </summary>
@@ -174,8 +207,9 @@ namespace GGJ
             {
                 if (off.magnitude < minDist) continue;
                 var p = center + off;
-                if (!Physics2D.OverlapPoint(p))
-                    return p;
+                if (Physics2D.OverlapPoint(p)) continue;
+                if (Utils.HasWallWithinRadius(p, 0.6f)) continue;
+                return p;
             }
             return center + new Vector2(3 * grid, 0);
         }
@@ -209,9 +243,20 @@ namespace GGJ
         }
 
         /// <summary> 切换键：戴上下一个槽位的面具（0→1→2→… 循环）。 </summary>
+        /// <summary> 鸟形态时若与墙重叠则不允许切换，避免切回地面层从墙里卡出。 </summary>
+        private bool IsOverlappingWall(float radius = 0.4f)
+        {
+            var hits = Physics2D.OverlapCircleAll((Vector2)transform.position, radius);
+            foreach (var col in hits)
+                if (col.CompareTag("Wall")) return true;
+            return false;
+        }
+
         public void SwitchMask()
         {
             if (maskBag == null || maskBag.Count == 0) return;
+            if (currentMask != MaskType.None && currentMask.GetCfg().CanFly && IsOverlappingWall())
+                return;
             currentWornIndex = (currentWornIndex + 1) % maskBag.Count;
             SetCurrentMask(maskBag[currentWornIndex]);
             UpdateUI?.Invoke();
@@ -270,12 +315,15 @@ namespace GGJ
         public void FireMask()
         {
             if (currentMask == MaskType.None) return;
+            float cd = GameCfg.Instance.FireMaskCooldown;
+            if (cd > 0f && Time.time - _lastFireMaskTime < cd) return;
             var dir = curDirection.GetVec();
             var spawnPos = (Vector2)transform.position + dir * (Utils.GridSize * fireSpawnOffset);
             var mask = Instantiate(GameCfg.Instance.MaskPrefab, spawnPos, Quaternion.identity).GetComponent<MaskObject>();
             mask.owner = this;
             mask.Init(currentMask, dir * GameCfg.Instance.BulletSpeed, this);
             RemoveCurMask();
+            _lastFireMaskTime = Time.time;
         }
 
         public void InitPlayer(int idx)
@@ -284,7 +332,36 @@ namespace GGJ
             name = $"Player_{PlayerIdx}";
             maskBag = new List<MaskType> { MaskType.None };
             currentWornIndex = 0;
+            IsMarked = false;
+            IsEliminated = false;
             SetCurrentMask(MaskType.None);
+            UpdateUI?.Invoke();
+        }
+        
+        /// <summary>
+        /// 设置标记状态（垫底警告）
+        /// </summary>
+        public void SetMarked(bool marked)
+        {
+            IsMarked = marked;
+            UpdateUI?.Invoke();
+        }
+        
+        /// <summary>
+        /// 设置淘汰状态
+        /// </summary>
+        public void SetEliminated(bool eliminated)
+        {
+            IsEliminated = eliminated;
+            if (eliminated)
+            {
+                // 禁用碰撞
+                var colliders = GetComponentsInChildren<Collider2D>();
+                foreach (var col in colliders)
+                {
+                    col.enabled = false;
+                }
+            }
             UpdateUI?.Invoke();
         }
 
@@ -350,9 +427,10 @@ namespace GGJ
             return best;
         }
 
-        /// <summary> 吃人者 A 调用：A 眩晕、偷 B 的分数，B 扣分，B 重新选择逃离方向（短距离无墙）并更新朝向。不摘面具、不位移推开。 </summary>
+        /// <summary> 吃人者 A 调用：A 眩晕、偷 B 的分数，B 扣分，B 重新选择逃离方向（短距离无墙）并更新朝向。不摘面具、不位移推开。眩晕中不能吃人。 </summary>
         public void DoEat(PlayerController other)
         {
+            if (IsStunned) return;
             var cfg = GameCfg.Instance;
             float stealAmount = other.curScore * cfg.EatStealRatio;
             stealAmount = Mathf.Min(stealAmount, other.curScore);
@@ -386,7 +464,7 @@ namespace GGJ
             if (Time.time < _dropCoinNextTime) return;
             float amount = Mathf.Min(cfg.DropCoinAmount, curScore);
             if (amount <= 0f) return;
-            var pos = FindNearbyEmptyPosition();
+            var pos = Utils.FindNearbyEmptyPosition((Vector2)transform.position);
             var prefab = GameCfg.Instance.CoinPrefab;
             if (prefab == null) return;
             var coinObj = Instantiate(prefab.gameObject, pos, Quaternion.identity);

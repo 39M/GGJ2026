@@ -37,7 +37,7 @@ namespace GGJ.Editor
                 Debug.Log($"[MapScannerAutoScan] 场景加载完成，自动扫描地图");
                 
                 // 标记场景已修改（如果需要保存扫描结果）
-                EditorSceneManager.MarkSceneDirty(mapScanner.gameObject.scene);
+                // EditorSceneManager.MarkSceneDirty(mapScanner.gameObject.scene);
             }
         }
     }

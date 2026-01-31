@@ -68,6 +68,12 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: MaskSprite
+      Entry: 6
+      Data: 
+    - Name: MaskIcon
+      Entry: 6
+      Data: 
     - Name: Speed
       Entry: 4
       Data: 5
@@ -125,15 +131,21 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 4
-      Data: 0.1806771
+      Data: 1
     - Name: 
       Entry: 4
-      Data: 0.179245174
+      Data: 1
     - Name: 
       Entry: 4
       Data: 1
     - Name: 
       Entry: 8
+      Data: 
+    - Name: MaskSprite
+      Entry: 6
+      Data: 
+    - Name: MaskIcon
+      Entry: 6
       Data: 
     - Name: Speed
       Entry: 4
@@ -195,18 +207,24 @@ MonoBehaviour:
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
       Entry: 4
-      Data: 0.5960785
+      Data: 1
     - Name: 
       Entry: 4
-      Data: 0.9843138
+      Data: 1
     - Name: 
       Entry: 4
-      Data: 0.5960785
+      Data: 1
     - Name: 
       Entry: 4
       Data: 1
     - Name: 
       Entry: 8
+      Data: 
+    - Name: MaskSprite
+      Entry: 6
+      Data: 
+    - Name: MaskIcon
+      Entry: 6
       Data: 
     - Name: Speed
       Entry: 4
@@ -262,10 +280,10 @@ MonoBehaviour:
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
       Entry: 4
-      Data: 0.5176471
+      Data: 1
     - Name: 
       Entry: 4
-      Data: 0.4392157
+      Data: 1
     - Name: 
       Entry: 4
       Data: 1
@@ -274,6 +292,12 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 8
+      Data: 
+    - Name: MaskSprite
+      Entry: 6
+      Data: 
+    - Name: MaskIcon
+      Entry: 6
       Data: 
     - Name: Speed
       Entry: 4
@@ -305,10 +329,10 @@ MonoBehaviour:
       Data: false
     - Name: DropCoinInterval
       Entry: 4
-      Data: 10
+      Data: 3
     - Name: DropCoinAmount
       Entry: 4
-      Data: 30
+      Data: 5
     - Name: 
       Entry: 8
       Data: 
@@ -325,12 +349,15 @@ MonoBehaviour:
   MaskPrefab: {fileID: 3275814422875547497, guid: 4fe415e934e15bb418dd79bfa9ffbc92, type: 3}
   CoinPrefab: {fileID: 8409749159196456642, guid: 1ae183a55e78bca48a7a14d907ff902a, type: 3}
   BulletSpeed: 40
+  FireMaskCooldown: 0.5
+  FiredByPickupBlockDuration: 2
   EatStealRatio: 0.5
   EatStunDuration: 1.5
   EatPushDistance: 2
   EventConfig:
     WaveDuration: 60
+    SpawnMode: 1
     FirstWaveCoins: 20
-    CoinsPerWave: 15
+    CoinsPerWave: 40
     CoinCheckRadius: 0.4
     MaxSpawnAttempts: 100
