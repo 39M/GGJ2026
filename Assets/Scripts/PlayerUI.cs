@@ -85,10 +85,11 @@ namespace GGJ
             if (pc == null || _maskSlots.Count == 0) return;
             var bag = pc.maskBag;
             if (bag == null) return;
+            int wornIdx = Mathf.Clamp(pc.currentWornIndex, 0, bag.Count - 1);
             for (int i = 0; i < _maskSlots.Count; i++)
             {
                 var slot = _maskSlots[i];
-                bool isCurrent = (i == 0);
+                bool isCurrent = (i == wornIdx);
                 if (i < bag.Count)
                 {
                     var mt = bag[i];

@@ -25,12 +25,14 @@ namespace GGJ
             InputSystemActions.Player_1.Left.started += ctx => OnMovePerform(Direction.Left, 0);
             InputSystemActions.Player_1.Right.started += ctx => OnMovePerform(Direction.Right, 0);
             InputSystemActions.Player_1.Attack.started += ctx => OnAttackStart(ctx, 0);
-            
+            InputSystemActions.Player_1.Switch.started += ctx => OnSwitchMask(0);
+
             InputSystemActions.Player_2.Up.started += ctx => OnMovePerform(Direction.Up, 1);
             InputSystemActions.Player_2.Down.started += ctx => OnMovePerform(Direction.Down, 1);
             InputSystemActions.Player_2.Left.started += ctx => OnMovePerform(Direction.Left, 1);
             InputSystemActions.Player_2.Right.started += ctx => OnMovePerform(Direction.Right, 1);
             InputSystemActions.Player_2.Attack.started += ctx => OnAttackStart(ctx, 1);
+            InputSystemActions.Player_2.Switch.started += ctx => OnSwitchMask(1);
         }
 
         private void OnDestroy()
@@ -41,6 +43,11 @@ namespace GGJ
         private void OnAttackStart(InputAction.CallbackContext ctx, int playerIdx)
         {
             GameManager.Instance.GetPlayer(playerIdx).FireMask();
+        }
+
+        private void OnSwitchMask(int playerIdx)
+        {
+            GameManager.Instance.GetPlayer(playerIdx).SwitchMask();
         }
 
         private void OnMovePerform(Direction dir, int playerIdx)
