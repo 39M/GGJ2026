@@ -253,6 +253,14 @@ namespace GGJ
             return currentMask.GetCfg().CanEat.Contains(other.currentMask);
         }
 
+        /// <summary> 当前面具能否吃该类型金币：老虎只能吃大金币，其它吃小金币。 </summary>
+        public bool CanEatCoin(CoinType coinType)
+        {
+            if (coinType == CoinType.Big)
+                return currentMask == MaskType.Tiger;
+            return currentMask != MaskType.Tiger;
+        }
+
         //TODO 吃掉后的额外规则..死亡？复活？冷却？得分？
         public void DoEat(PlayerController other)
         {
