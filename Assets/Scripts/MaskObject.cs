@@ -28,11 +28,24 @@ namespace GGJ
         
         private void OnTriggerEnter2D(Collider2D other)
         {
+            Debug.Log("MaskObject Triggered: " + other.name);
+            
             var coin = other.GetComponentInParent<Coin>();
             if (coin != null) return;
             var pc = other.GetComponentInParent<PlayerController>();
-            if (pc != null && pc != owner) pc.GetMask(mask);
-            if (pc == null ||  pc != owner) Destroy(gameObject);
+            if (pc != null && pc != owner)
+            {
+                // 打印面具被哪个玩家吃了
+                Debug.Log($"Mask {mask} eaten by Player {pc.PlayerIdx}");
+                pc.GetMask(mask);
+            }
+
+            if (pc == null || pc != owner)
+            {
+                //打印丢出去的面具碰到了其他玩家
+                Debug.Log($"Mask {mask} hit Player {(pc != null ? pc.PlayerIdx.ToString() : "None")}");
+                Destroy(gameObject);
+            }
         }
     }
 }
