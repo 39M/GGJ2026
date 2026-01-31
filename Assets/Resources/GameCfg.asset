@@ -16,9 +16,9 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: -7136673967338131891, guid: 79291029de6e5cd41ac1e9455f48d456, type: 3}
-    - {fileID: 4143598101872524988, guid: 9be6d50e2f328ac45a93376ab54db581, type: 3}
-    - {fileID: -4115059098874668589, guid: 705193d5e76cd2f468553c4d8b5ed36b, type: 3}
+    - {fileID: -7136673967338131891, guid: 163329ced213be244beee82222d11d69, type: 3}
+    - {fileID: 4143598101872524988, guid: 8c50fe1498f30684b90066914411d9e8, type: 3}
+    - {fileID: -4115059098874668589, guid: 65e1bf3908be5d04d9f3bc3ed598893f, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -148,8 +148,8 @@ MonoBehaviour:
       Entry: 10
       Data: 0
     - Name: MaskIcon
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 0
     - Name: Speed
       Entry: 4
       Data: 7
@@ -227,8 +227,8 @@ MonoBehaviour:
       Entry: 10
       Data: 1
     - Name: MaskIcon
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 1
     - Name: Speed
       Entry: 4
       Data: 5
@@ -297,8 +297,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: MaskSprite
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 2
     - Name: MaskIcon
       Entry: 10
       Data: 2
@@ -351,6 +351,11 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 3716861478852819177, guid: a1be37b8b87d0174a9b8ec32226ea5ba, type: 3}
   MaskPrefab: {fileID: 3275814422875547497, guid: 4fe415e934e15bb418dd79bfa9ffbc92, type: 3}
   CoinPrefab: {fileID: 8409749159196456642, guid: 1ae183a55e78bca48a7a14d907ff902a, type: 3}
+  PlayerSprites:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   BigCoinPrefab: {fileID: 6317235755775435011, guid: 00dda75df64a7a642a6e382d50821b17, type: 3}
   BulletSpeed: 40
   FireMaskCooldown: 0.5
