@@ -93,6 +93,10 @@ namespace GGJ
         public float BulletSpeed;
 
         [TabGroup("基础配置")]
+        [LabelText("发射面具冷却(秒)：该时间内不能再次发射")]
+        public float FireMaskCooldown = 0.5f;
+
+        [TabGroup("基础配置")]
         [LabelText("发射者拾取冷却(秒)：该时间内发射者不能拾取自己发射的面具，避免墙边立刻捡回")]
         public float FiredByPickupBlockDuration = 2f;
         
