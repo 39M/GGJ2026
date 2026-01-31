@@ -2241,9 +2241,9 @@ MonoBehaviour:
   blockedColor: {r: 1, g: 0, b: 0, a: 0.23529412}
   connectionColor: {r: 0, g: 0, b: 1, a: 1}
   mapData:
-    width: 26
-    height: 19
-    origin: {x: -13, y: -10}
+    width: 24
+    height: 17
+    origin: {x: -12, y: -9}
     cellSize: 1
 --- !u!1001 &461785677
 PrefabInstance:
@@ -9902,6 +9902,14 @@ PrefabInstance:
     - target: {fileID: 384589134722621856, guid: f8bf0690d3467174aa78e632c6602a99, type: 3}
       propertyPath: m_Name
       value: Level
+      objectReference: {fileID: 0}
+    - target: {fileID: 2931547127082817216, guid: f8bf0690d3467174aa78e632c6602a99, type: 3}
+      propertyPath: MaxWaveTime
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 2931547127082817216, guid: f8bf0690d3467174aa78e632c6602a99, type: 3}
+      propertyPath: enableTutorialCheck
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2931547127082817216, guid: f8bf0690d3467174aa78e632c6602a99, type: 3}
       propertyPath: PlayerStart.Array.size
