@@ -42,8 +42,16 @@ namespace GGJ
                 Debug.Log($"Mask {mask} hit Coin");
                 return;
             }
-            
-            
+
+            // 打印面具碰墙停下
+            if (other.CompareTag("Wall"))
+            {
+                rig.linearVelocity = Vector2.zero;
+                owner = null;
+                return;
+            }
+
+
             var pc = other.GetComponentInParent<PlayerController>();
             
             if (pc != null && pc != owner)
