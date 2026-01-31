@@ -94,7 +94,98 @@ namespace GGJ
             // 分析网格之间的连通关系
             AnalyzeConnections();
 
-            Debug.Log($"地图扫描完成！网格: {gridWidth}x{gridHeight}，有碰撞的格子: {GetBlockedCellCount()}");
+            // 裁剪边界，移除最外层碰撞之外的空白区域
+            TrimBounds();
+
+            Debug.Log($"地图扫描完成！网格: {mapData.width}x{mapData.height}，原点: {mapData.origin}，有碰撞的格子: {GetBlockedCellCount()}");
+        }
+
+        /// <summary>
+        /// 裁剪边界，移除最外层碰撞之外的空白区域
+        /// </summary>
+        private void TrimBounds()
+        {
+            int minX = mapData.width;
+            int maxX = -1;
+            int minY = mapData.height;
+            int maxY = -1;
+
+            // 找到任意方向不连通的格子作为边界
+            for (int x = 0; x < mapData.width; x++)
+            {
+                for (int y = 0; y < mapData.height; y++)
+                {
+                    var cell = mapData.grid[x, y];
+                    
+                    // 检查是否有任意方向不连通（表示是边界或有碰撞）
+                    bool hasBlockedDirection = false;
+                    for (int dir = 0; dir < 4; dir++)
+                    {
+                        if (!cell.connections[dir])
+                        {
+                            hasBlockedDirection = true;
+                            break;
+                        }
+                    }
+                    
+                    // 有碰撞或有不连通方向的格子都算作有效区域
+                    if (cell.hasCollision || hasBlockedDirection)
+                    {
+                        minX = Mathf.Min(minX, x + 1);
+                        maxX = Mathf.Max(maxX, x - 1);
+                        minY = Mathf.Min(minY, y + 1);
+                        maxY = Mathf.Max(maxY, y - 1);
+                    }
+                }
+            }
+
+            // 如果没有找到边界格子，保持原样
+            if (maxX < 0 || maxY < 0)
+            {
+                Debug.LogWarning("[MapScanner] 未找到任何边界格子，保持原始边界");
+                return;
+            }
+
+            // 计算新的尺寸
+            int newWidth = maxX - minX + 1;
+            int newHeight = maxY - minY + 1;
+
+            // 如果边界没有变化，不需要裁剪
+            if (minX == 0 && minY == 0 && newWidth == mapData.width && newHeight == mapData.height)
+            {
+                return;
+            }
+
+            // 创建新的网格数组
+            GridCell[,] newGrid = new GridCell[newWidth, newHeight];
+
+            // 复制数据到新数组，并更新格子的坐标（保留连通关系）
+            for (int x = 0; x < newWidth; x++)
+            {
+                for (int y = 0; y < newHeight; y++)
+                {
+                    var oldCell = mapData.grid[x + minX, y + minY];
+                    newGrid[x, y] = new GridCell(x, y)
+                    {
+                        hasCollision = oldCell.hasCollision,
+                        connections = (bool[])oldCell.connections.Clone()
+                    };
+                }
+            }
+
+            // 计算新的原点（世界坐标）
+            Vector2 newOrigin = new Vector2(
+                mapData.origin.x + minX * mapData.cellSize,
+                mapData.origin.y + minY * mapData.cellSize
+            );
+
+            // 更新 mapData
+            mapData.grid = newGrid;
+            mapData.width = newWidth;
+            mapData.height = newHeight;
+            mapData.origin = newOrigin;
+
+            Debug.Log($"[MapScanner] 边界裁剪完成: 原始({minX},{minY})-({maxX},{maxY}) -> 新尺寸 {newWidth}x{newHeight}, 新原点 {newOrigin}");
         }
 
         /// <summary>
@@ -175,8 +266,8 @@ namespace GGJ
         /// </summary>
         public Vector2Int WorldToGridPosition(Vector2 worldPos)
         {
-            int x = Mathf.FloorToInt((worldPos.x - scanOrigin.x + cellSize * 0.5f) / cellSize);
-            int y = Mathf.FloorToInt((worldPos.y - scanOrigin.y + cellSize * 0.5f) / cellSize);
+            int x = Mathf.FloorToInt((worldPos.x - mapData.origin.x) / mapData.cellSize);
+            int y = Mathf.FloorToInt((worldPos.y - mapData.origin.y) / mapData.cellSize);
 
             return new Vector2Int(x, y);
         }
@@ -187,8 +278,8 @@ namespace GGJ
         public Vector2 GetCellCenterWorld(int x, int y)
         {
             return new Vector2(
-                scanOrigin.x + x * cellSize + cellSize * 0.5f,
-                scanOrigin.y + y * cellSize + cellSize * 0.5f
+                mapData.origin.x + x * mapData.cellSize + mapData.cellSize * 0.5f,
+                mapData.origin.y + y * mapData.cellSize + mapData.cellSize * 0.5f
             );
         }
 
