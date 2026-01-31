@@ -69,10 +69,16 @@ namespace GGJ
         public Rigidbody2D rig;
         public SpriteRenderer mainSprite;
         
-        [LabelText("当前面具")]
-        public MaskType currentMask = MaskType.None;
-        [LabelText("背包面具")] 
-        public MaskType bagMask = MaskType.None;
+        /// <summary> 面具列表：索引 0 = 当前戴的，1.. = 背包（越靠后越古早）。当前戴的也在本列表中。 </summary>
+        [LabelText("面具列表(0=当前 1..=背包)")]
+        public List<MaskType> maskBag = new List<MaskType> { MaskType.None };
+        [LabelText("背包容量(包含当前带的)")]
+        public int bagCapacity = 3;
+
+        /// <summary> 当前戴在脸上的面具，即 maskBag[0]。 </summary>
+        public MaskType currentMask => (maskBag != null && maskBag.Count > 0) ? maskBag[0] : MaskType.None;
+        /// <summary> 背包里下一个面具（摘下当前后会戴上的），供 UI 等使用。 </summary>
+        public MaskType bagPreviewMask => (maskBag != null && maskBag.Count > 1) ? maskBag[1] : MaskType.None;
         [LabelText("基础速度")] 
         public float speed = 0;
         [LabelText("追逐速度")] 
@@ -90,7 +96,20 @@ namespace GGJ
         
         public void SetCurrentMask(MaskType mask)
         {
-            currentMask = mask;
+            if (maskBag == null)
+            {
+                maskBag = new List<MaskType>();
+            }
+
+            if (maskBag.Count == 0)
+            {
+                maskBag.Add(mask);
+            }
+            else
+            {
+                maskBag[0] = mask;
+            }
+            
             var cfg = mask.GetCfg();
             speed = cfg.Speed;
             eatSpeed = cfg.EatSpeed;
@@ -99,11 +118,59 @@ namespace GGJ
             mainSprite.color = cfg.TestColor;
             UpdateUI?.Invoke();
         }
+
+        /// <summary> 在玩家附近找一个空地位置（无碰撞体的点），用于掉落面具。 </summary>
+        private Vector2 FindNearbyEmptyPosition()
+        {
+            var center = (Vector2)transform.position;
+            var grid = Utils.GridSize;
+            // 按距离从近到远尝试：相邻格、对角、再远一圈
+            var offsets = new[]
+            {
+                new Vector2(grid, 0), new Vector2(-grid, 0), new Vector2(0, grid), new Vector2(0, -grid),
+                new Vector2(grid, grid), new Vector2(-grid, grid), new Vector2(grid, -grid), new Vector2(-grid, -grid),
+                new Vector2(2 * grid, 0), new Vector2(-2 * grid, 0), new Vector2(0, 2 * grid), new Vector2(0, -2 * grid),
+            };
+            foreach (var off in offsets)
+            {
+                var p = center + off;
+                if (!Physics2D.OverlapPoint(p))
+                    return p;
+            }
+            return center + new Vector2(grid, 0);
+        }
+
+        /// <summary> 将指定类型的面具生成在附近空地上（掉落）。 </summary>
+        private void DropMaskAtNearbyEmpty(MaskType maskType)
+        {
+            if (maskType == MaskType.None) return;
+            var pos = FindNearbyEmptyPosition();
+            var mask = Instantiate(GameCfg.Instance.MaskPrefab, pos, Quaternion.identity).GetComponent<MaskObject>();
+            mask.Init(maskType, Vector2.zero, null);
+        }
         
         public void GetMask(MaskType mask)
         {
-            bagMask = currentMask;
-            SetCurrentMask(mask);
+            Debug.Log($"Player {PlayerIdx} got mask {mask}");
+            if (maskBag == null) maskBag = new List<MaskType> { MaskType.None };
+            
+            // 新面具插到最前（成为当前），原当前自然退到 index 1
+            maskBag.Insert(0, mask);
+            
+            // 若原先没有面具，列表可能是 [None]，插入后为 [mask, None]，去掉末尾的 None
+            if (maskBag.Count > 1 && maskBag[maskBag.Count - 1] == MaskType.None)
+            {
+                maskBag.RemoveAt(maskBag.Count - 1);
+            }
+            
+            // 背包满时丢弃最古早的（列表最后一个）
+            while (maskBag.Count > bagCapacity)
+            {
+                var drop = maskBag[maskBag.Count - 1];
+                maskBag.RemoveAt(maskBag.Count - 1);
+                DropMaskAtNearbyEmpty(drop);
+            }
+            SetCurrentMask(maskBag[0]);
             UpdateUI?.Invoke();
         }
         
@@ -122,8 +189,20 @@ namespace GGJ
 
         public void RemoveCurMask()
         {
-            SetCurrentMask(bagMask);
-            bagMask = MaskType.None;
+            if (maskBag == null || maskBag.Count <= 1)
+            {
+                if (maskBag != null)
+                {
+                    maskBag.Clear();
+                }
+                maskBag = new List<MaskType> { MaskType.None };
+                SetCurrentMask(MaskType.None);
+            }
+            else
+            {
+                maskBag.RemoveAt(0);
+                SetCurrentMask(maskBag[0]);
+            }
             UpdateUI?.Invoke();
         }
         
@@ -139,6 +218,7 @@ namespace GGJ
         {
             PlayerIdx = idx;
             name = $"Player_{PlayerIdx}";
+            maskBag = new List<MaskType> { MaskType.None };
             SetCurrentMask(MaskType.None);
             UpdateUI?.Invoke();
         }
