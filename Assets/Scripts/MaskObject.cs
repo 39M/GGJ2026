@@ -57,31 +57,52 @@ namespace GGJ
             // 墙只认小碰撞：大碰撞碰到墙不处理，等小碰撞碰到再停
             if (other.CompareTag("Wall"))
             {
+                Debug.Log($"MaskObject: Hit Wall by {(isLargeCollider ? "LargeCollider" : "SmallCollider")}");
                 if (isLargeCollider)
+                {
+                    Debug.Log("MaskObject: Ignoring wall hit on large collider.");
                     return;
+                }
                 rig.linearVelocity = Vector2.zero;
                 owner = null;
                 _isFired = false;
+                Debug.Log("MaskObject: Stopped moving after hitting wall.");
+                
                 if (largeCollider != null)
+                {
+                    Debug.Log("MaskObject: Disabling large collider after hitting wall.");
                     largeCollider.enabled = false;
+                }
                 return;
             }
 
             var pc = other.GetComponentInParent<PlayerController>();
             if (pc == null)
+            {
+                Debug.Log("MaskObject: Triggered by non-player object, ignoring.");
                 return;
+            }
+
             if (pc == owner)
+            {
+                Debug.Log("MaskObject: Triggered by owner, ignoring.");
                 return;
-            // 发射者在 FiredByPickupBlockDuration 秒内不能拾取，避免墙边立刻捡回；超时后可捡。掉落的面具 _firedBy 为 null 不受影响。
+            }
+            // 仅对发射者限时：FiredByPickupBlockDuration 秒内不能拾取（含刚发射同位置 0.3s + 墙边立刻捡回）。其他玩家无时间限制，打中即戴。
             if (pc == _firedBy && Time.time - _firedTime < FiredByPickupBlockDuration)
+            {
+                Debug.Log("MaskObject: Triggered by firedBy within block duration, ignoring.");
                 return;
-            if (Time.time - _firedTime < 0.3f)
-                return;
+            }
 
             bool shouldHit = isLargeCollider ? _isFired : !_isFired;
             if (!shouldHit)
+            {
+                Debug.Log("MaskObject: Collider type does not match state, ignoring.");
                 return;
+            }
 
+            Debug.Log($"MaskObject: Picked up by player {pc.name} using {(isLargeCollider ? "LargeCollider" : "SmallCollider")}");
             pc.GetMask(mask);
             Destroy(gameObject);
         }
