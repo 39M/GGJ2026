@@ -210,9 +210,20 @@ namespace GGJ
         }
 
         /// <summary> 切换键：戴上下一个槽位的面具（0→1→2→… 循环）。 </summary>
+        /// <summary> 鸟形态时若与墙重叠则不允许切换，避免切回地面层从墙里卡出。 </summary>
+        private bool IsOverlappingWall(float radius = 0.4f)
+        {
+            var hits = Physics2D.OverlapCircleAll((Vector2)transform.position, radius);
+            foreach (var col in hits)
+                if (col.CompareTag("Wall")) return true;
+            return false;
+        }
+
         public void SwitchMask()
         {
             if (maskBag == null || maskBag.Count == 0) return;
+            if (currentMask != MaskType.None && currentMask.GetCfg().CanFly && IsOverlappingWall())
+                return;
             currentWornIndex = (currentWornIndex + 1) % maskBag.Count;
             SetCurrentMask(maskBag[currentWornIndex]);
             UpdateUI?.Invoke();
