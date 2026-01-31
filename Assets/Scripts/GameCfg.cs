@@ -33,6 +33,17 @@ namespace GGJ
     }
     
     /// <summary>
+    /// 金币生成模式
+    /// </summary>
+    public enum CoinSpawnMode
+    {
+        [LabelText("随机格子")]
+        RandomGrid,         // 在可行走格子中随机生成
+        [LabelText("预设位置")]
+        PresetPositions     // 从关卡预设的 Coin 位置中随机生成
+    }
+    
+    /// <summary>
     /// 游戏事件配置
     /// </summary>
     [Serializable, HideReferenceObjectPicker]
@@ -40,6 +51,9 @@ namespace GGJ
     {
         [LabelText("每波持续时间（秒）")]
         public float WaveDuration = 30f;
+
+        [LabelText("生成模式")]
+        public CoinSpawnMode SpawnMode = CoinSpawnMode.PresetPositions;
         
         [LabelText("第一波金币数量")]
         public int FirstWaveCoins = 15;
@@ -47,7 +61,7 @@ namespace GGJ
         [LabelText("每波金币数量")]
         public int CoinsPerWave = 10;
         
-        [LabelText("金币碰撞检测半径")]
+        [LabelText("避免重叠的检测半径")]
         public float CoinCheckRadius = 0.4f;
         
         [LabelText("单次生成最大尝试次数")]
