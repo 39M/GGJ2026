@@ -12,13 +12,114 @@ namespace GGJ
         [Header("生成设置")]
         [Tooltip("检测重叠时使用的层级")]
         public LayerMask overlapCheckLayers = ~0;
-        
+
+        /// <summary> 预设的金币位置列表（从关卡中收集） </summary>
+        private List<Vector2> presetPositions = new List<Vector2>();
+
+        /// <summary>
+        /// 初始化时收集关卡中已有的金币位置
+        /// </summary>
+        protected override void Awake()
+        {
+            base.Awake();
+            CollectPresetPositions();
+        }
+
+        /// <summary>
+        /// 收集关卡中所有预设金币的位置
+        /// </summary>
+        public void CollectPresetPositions()
+        {
+            presetPositions.Clear();
+            
+            var mapScanner = MapScanner.Instance;
+            var existingCoins = FindObjectsByType<Coin>(FindObjectsSortMode.None);
+            
+            foreach (var coin in existingCoins)
+            {
+                Vector2 coinPos = coin.transform.position;
+                
+                // 将金币位置对齐到网格中心
+                // if (mapScanner != null && mapScanner.mapData != null)
+                // {
+                //     var gridPos = mapScanner.WorldToGridPosition(coinPos);
+                //     var alignedPos = mapScanner.GetCellCenterWorld(gridPos.x, gridPos.y);
+                //     coin.transform.position = alignedPos; // 将现有金币移动到对齐位置
+                //     presetPositions.Add(alignedPos);
+                // }
+                // else
+                {
+                    // 如果 MapScanner 未初始化，使用原始位置
+                    presetPositions.Add(coinPos);
+                }
+            }
+            
+            Debug.Log($"[CoinSpawner] 收集了 {presetPositions.Count} 个预设金币位置（已对齐网格）");
+        }
+
         /// <summary>
         /// 生成指定数量的金币
         /// </summary>
         /// <param name="count">金币数量</param>
         /// <returns>实际生成的金币列表</returns>
         public List<Coin> SpawnCoins(int count)
+        {
+            var config = GameCfg.Instance.EventConfig;
+            
+            switch (config.SpawnMode)
+            {
+                case CoinSpawnMode.PresetPositions:
+                    return SpawnCoinsAtPresetPositions(count);
+                case CoinSpawnMode.RandomGrid:
+                default:
+                    return SpawnCoinsAtRandomGrid(count);
+            }
+        }
+
+        /// <summary>
+        /// 在预设位置生成金币
+        /// </summary>
+        private List<Coin> SpawnCoinsAtPresetPositions(int count)
+        {
+            var spawnedCoins = new List<Coin>();
+            var config = GameCfg.Instance.EventConfig;
+            
+            if (presetPositions.Count == 0)
+            {
+                Debug.LogWarning("[CoinSpawner] 没有预设金币位置！将使用随机格子模式");
+                return SpawnCoinsAtRandomGrid(count);
+            }
+            
+            float checkRadius = config.CoinCheckRadius;
+            
+            // 打乱预设位置顺序
+            var shuffledPositions = presetPositions.OrderBy(_ => Random.value).ToList();
+            
+            int spawned = 0;
+            foreach (var pos in shuffledPositions)
+            {
+                if (spawned >= count) break;
+                
+                // 检查该位置是否已有物体
+                if (!IsPositionOccupied(pos, checkRadius))
+                {
+                    var coin = SpawnCoinAt(pos);
+                    if (coin != null)
+                    {
+                        spawnedCoins.Add(coin);
+                        spawned++;
+                    }
+                }
+            }
+            
+            Debug.Log($"[CoinSpawner] 预设位置模式：成功生成 {spawned}/{count} 个金币（共 {presetPositions.Count} 个预设位置）");
+            return spawnedCoins;
+        }
+
+        /// <summary>
+        /// 在随机格子生成金币
+        /// </summary>
+        private List<Coin> SpawnCoinsAtRandomGrid(int count)
         {
             var spawnedCoins = new List<Coin>();
             var mapScanner = MapScanner.Instance;
@@ -53,12 +154,7 @@ namespace GGJ
                 var cell = shuffledCells[cellIndex];
                 var worldPos = mapScanner.GetCellCenterWorld(cell.x, cell.y);
                 
-                // 添加小范围随机偏移，使金币位置不完全在格子中心
-                var offset = new Vector2(
-                    Random.Range(-0.3f, 0.3f),
-                    Random.Range(-0.3f, 0.3f)
-                );
-                var spawnPos = worldPos + offset;
+                var spawnPos = worldPos;
                 
                 // 检查该位置是否已有物体
                 if (!IsPositionOccupied(spawnPos, checkRadius))
@@ -75,7 +171,7 @@ namespace GGJ
                 cellIndex++;
             }
             
-            Debug.Log($"[CoinSpawner] 成功生成 {spawned}/{count} 个金币，尝试次数: {attempts}");
+            Debug.Log($"[CoinSpawner] 随机格子模式：成功生成 {spawned}/{count} 个金币，尝试次数: {attempts}");
             return spawnedCoins;
         }
         
@@ -98,9 +194,20 @@ namespace GGJ
         /// <summary>
         /// 检查位置是否被占用
         /// </summary>
+        /// <param name="position">目标位置</param>
+        /// <param name="checkRadius">检测半径</param>
         private bool IsPositionOccupied(Vector2 position, float checkRadius)
         {
             var colliders = Physics2D.OverlapCircleAll(position, checkRadius, overlapCheckLayers);
+            var mapScanner = MapScanner.Instance;
+            
+            // 获取目标位置的网格坐标
+            Vector2Int targetGridPos = Vector2Int.zero;
+            bool hasMapScanner = mapScanner != null && mapScanner.mapData != null;
+            if (hasMapScanner)
+            {
+                targetGridPos = mapScanner.WorldToGridPosition(position);
+            }
             
             foreach (var col in colliders)
             {
@@ -110,12 +217,62 @@ namespace GGJ
                     return true;
                 }
                 
-                // 检查是否是金币、玩家或面具
-                if (col.GetComponentInParent<Coin>() != null ||
-                    col.GetComponentInParent<PlayerController>() != null ||
-                    col.GetComponentInParent<MaskObject>() != null)
+                // 检查金币：只有在同一格子时才算占用
+                var coin = col.GetComponentInParent<Coin>();
+                if (coin != null)
                 {
-                    return true;
+                    if (hasMapScanner)
+                    {
+                        var coinGridPos = mapScanner.WorldToGridPosition(coin.transform.position);
+                        if (coinGridPos == targetGridPos)
+                        {
+                            return true; // 同一格子，被占用
+                        }
+                        // 不同格子，忽略（碰撞体辐射到旁边）
+                    }
+                    else
+                    {
+                        return true; // 无法判断格子，保守处理
+                    }
+                    continue;
+                }
+                
+                // 检查玩家：同样只有在同一格子时才算占用
+                var player = col.GetComponentInParent<PlayerController>();
+                if (player != null)
+                {
+                    if (hasMapScanner)
+                    {
+                        var playerGridPos = mapScanner.WorldToGridPosition(player.transform.position);
+                        if (playerGridPos == targetGridPos)
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                    continue;
+                }
+                
+                // 检查面具：同样只有在同一格子时才算占用
+                var mask = col.GetComponentInParent<MaskObject>();
+                if (mask != null)
+                {
+                    if (hasMapScanner)
+                    {
+                        var maskGridPos = mapScanner.WorldToGridPosition(mask.transform.position);
+                        if (maskGridPos == targetGridPos)
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                    continue;
                 }
             }
             

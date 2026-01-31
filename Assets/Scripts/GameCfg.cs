@@ -11,6 +11,10 @@ namespace GGJ
     {
         [LabelText("测试颜色")]
         public Color TestColor = Color.white;
+        [LabelText("面具图片(场景/玩家戴面具时显示，不填则沿用预制体原有图)")]
+        public Sprite MaskSprite;
+        [LabelText("面具图标(UI 背包槽显示，不填则用面具图片)")]
+        public Sprite MaskIcon;
         [LabelText("基础速度")]
         public float Speed = 10;
         [LabelText("追逐速度")]
@@ -24,7 +28,23 @@ namespace GGJ
         [LabelText("只能吃大金币")]
         public bool OnlyEatBigCoin;
 
+        [LabelText("掉落金币间隔(秒)，0=不掉落")]
+        public float DropCoinInterval;
+        [LabelText("每次掉落金币数(分数)")]
+        public float DropCoinAmount;
+
         public LayerMask Layer => CanFly ? LayerMask.NameToLayer("Bird") : LayerMask.NameToLayer("Default");
+    }
+    
+    /// <summary>
+    /// 金币生成模式
+    /// </summary>
+    public enum CoinSpawnMode
+    {
+        [LabelText("随机格子")]
+        RandomGrid,         // 在可行走格子中随机生成
+        [LabelText("预设位置")]
+        PresetPositions     // 从关卡预设的 Coin 位置中随机生成
     }
     
     /// <summary>
@@ -35,6 +55,9 @@ namespace GGJ
     {
         [LabelText("每波持续时间（秒）")]
         public float WaveDuration = 30f;
+
+        [LabelText("生成模式")]
+        public CoinSpawnMode SpawnMode = CoinSpawnMode.PresetPositions;
         
         [LabelText("第一波金币数量")]
         public int FirstWaveCoins = 15;
@@ -42,7 +65,7 @@ namespace GGJ
         [LabelText("每波金币数量")]
         public int CoinsPerWave = 10;
         
-        [LabelText("金币碰撞检测半径")]
+        [LabelText("避免重叠的检测半径")]
         public float CoinCheckRadius = 0.4f;
         
         [LabelText("单次生成最大尝试次数")]
@@ -68,6 +91,14 @@ namespace GGJ
         [TabGroup("基础配置")]
         [LabelText("发射面具速度")]
         public float BulletSpeed;
+
+        [TabGroup("基础配置")]
+        [LabelText("发射面具冷却(秒)：该时间内不能再次发射")]
+        public float FireMaskCooldown = 0.5f;
+
+        [TabGroup("基础配置")]
+        [LabelText("发射者拾取冷却(秒)：该时间内发射者不能拾取自己发射的面具，避免墙边立刻捡回")]
+        public float FiredByPickupBlockDuration = 2f;
         
         [TabGroup("基础配置")]
         [Header("吃掉玩家")]

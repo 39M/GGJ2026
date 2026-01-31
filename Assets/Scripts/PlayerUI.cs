@@ -94,9 +94,17 @@ namespace GGJ
                 {
                     var mt = bag[i];
                     slot.gameObject.SetActive(true);
-                    var c = mt == MaskType.None ? Color.gray : mt.GetCfg().TestColor;
+                    var cfg = mt == MaskType.None ? null : mt.GetCfg();
+                    var c = mt == MaskType.None ? Color.gray : cfg.TestColor;
                     if (!isCurrent) c.a = otherSlotAlpha;
                     slot.color = c;
+                    if (mt != MaskType.None && cfg != null)
+                    {
+                        if (cfg.MaskIcon != null)
+                            slot.sprite = cfg.MaskIcon;
+                        else if (cfg.MaskSprite != null)
+                            slot.sprite = cfg.MaskSprite;
+                    }
                     slot.transform.localScale = isCurrent ? Vector3.one * currentSlotScale : Vector3.one;
                 }
                 else
