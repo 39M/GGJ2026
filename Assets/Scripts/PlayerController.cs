@@ -121,7 +121,6 @@ namespace GGJ
         {
             var center = (Vector2)transform.position;
             var grid = Utils.GridSize;
-            // 按距离从近到远尝试：相邻格、对角、再远一圈
             var offsets = new[]
             {
                 new Vector2(grid, 0), new Vector2(-grid, 0), new Vector2(0, grid), new Vector2(0, -grid),
@@ -137,11 +136,37 @@ namespace GGJ
             return center + new Vector2(grid, 0);
         }
 
-        /// <summary> 将指定类型的面具生成在附近空地上（掉落）。 </summary>
+        [LabelText("掉落面具最小距离(格)")]
+        public float dropMinDistance = 3f;
+        /// <summary> 找一个离玩家足够远的空位用于掉落面具，避免刚掉就被自己触发拾取。 </summary>
+        private Vector2 FindDropPositionFarEnough()
+        {
+            var center = (Vector2)transform.position;
+            var grid = Utils.GridSize;
+            float minDist = dropMinDistance * grid;
+            // 只尝试距离 >= dropMinDistance 格的点，先近后远
+            var offsets = new[]
+            {
+                new Vector2(3 * grid, 0), new Vector2(-3 * grid, 0), new Vector2(0, 3 * grid), new Vector2(0, -3 * grid),
+                new Vector2(3 * grid, 3 * grid), new Vector2(-3 * grid, 3 * grid), new Vector2(3 * grid, -3 * grid), new Vector2(-3 * grid, -3 * grid),
+                new Vector2(2 * grid, 0), new Vector2(-2 * grid, 0), new Vector2(0, 2 * grid), new Vector2(0, -2 * grid),
+                new Vector2(2 * grid, 2 * grid), new Vector2(-2 * grid, 2 * grid), new Vector2(2 * grid, -2 * grid), new Vector2(-2 * grid, -2 * grid),
+            };
+            foreach (var off in offsets)
+            {
+                if (off.magnitude < minDist) continue;
+                var p = center + off;
+                if (!Physics2D.OverlapPoint(p))
+                    return p;
+            }
+            return center + new Vector2(3 * grid, 0);
+        }
+
+        /// <summary> 将指定类型的面具生成在较远空地上（掉落），地上面具无主人。 </summary>
         private void DropMaskAtNearbyEmpty(MaskType maskType)
         {
             if (maskType == MaskType.None) return;
-            var pos = FindNearbyEmptyPosition();
+            var pos = FindDropPositionFarEnough();
             var mask = Instantiate(GameCfg.Instance.MaskPrefab, pos, Quaternion.identity).GetComponent<MaskObject>();
             mask.Init(maskType, Vector2.zero, null);
         }
@@ -226,6 +251,14 @@ namespace GGJ
         {
             if (other == this) return false;
             return currentMask.GetCfg().CanEat.Contains(other.currentMask);
+        }
+
+        /// <summary> 当前面具能否吃该类型金币：老虎只能吃大金币，其它吃小金币。 </summary>
+        public bool CanEatCoin(CoinType coinType)
+        {
+            if (coinType == CoinType.Big)
+                return currentMask == MaskType.Tiger;
+            return currentMask != MaskType.Tiger;
         }
 
         //TODO 吃掉后的额外规则..死亡？复活？冷却？得分？
