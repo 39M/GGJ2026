@@ -21,6 +21,8 @@ namespace GGJ
         public bool CanFly;
         [LabelText("能吃")] 
         public List<MaskType> CanEat;
+        [LabelText("只能吃大金币")]
+        public bool OnlyEatBigCoin;
 
         public LayerMask Layer => CanFly ? LayerMask.NameToLayer("Bird") : LayerMask.NameToLayer("Default");
     }
