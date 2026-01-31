@@ -37,6 +37,10 @@ namespace GGJ
                 player.InitPlayer(idx);
                 PlayerList.Add(player);
 
+                var playerSprites = GameCfg.Instance.PlayerSprites;
+                if (playerSprites != null && idx < playerSprites.Length && playerSprites[idx] != null && player.mainSprite != null)
+                    player.mainSprite.sprite = playerSprites[idx];
+
                 if (AIPlayerIndices.Contains(idx))
                 {
                     var ai = go.GetComponent<MaskAIController>();
