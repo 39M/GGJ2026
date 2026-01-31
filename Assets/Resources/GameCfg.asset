@@ -134,10 +134,10 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
       Data: 1
@@ -210,13 +210,13 @@ MonoBehaviour:
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.010814786
     - Name: 
       Entry: 4
       Data: 1
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
       Data: 1
@@ -283,10 +283,10 @@ MonoBehaviour:
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.7208493
     - Name: 
       Entry: 4
       Data: 1
@@ -351,6 +351,11 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 3716861478852819177, guid: a1be37b8b87d0174a9b8ec32226ea5ba, type: 3}
   MaskPrefab: {fileID: 3275814422875547497, guid: 4fe415e934e15bb418dd79bfa9ffbc92, type: 3}
   CoinPrefab: {fileID: 8409749159196456642, guid: 1ae183a55e78bca48a7a14d907ff902a, type: 3}
+  PlayerSprites:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   BulletSpeed: 40
   FireMaskCooldown: 0.5
   FiredByPickupBlockDuration: 2
