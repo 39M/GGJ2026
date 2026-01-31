@@ -87,6 +87,10 @@ namespace GGJ
         [TabGroup("基础配置")]
         [LabelText("金币Prefab")]
         public Coin CoinPrefab;
+
+        [TabGroup("基础配置")]
+        [LabelText("玩家外观(最多4个，索引0~3对应玩家1~4；不填则用Prefab默认)")]
+        public Sprite[] PlayerSprites = new Sprite[4];
         
         [TabGroup("基础配置")]
         [LabelText("发射面具速度")]
