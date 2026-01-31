@@ -55,6 +55,18 @@ namespace GGJ
         {
             return DirMap[dir];
         }
+
+        public static Direction Reverse(this Direction dir)
+        {
+            return dir switch
+            {
+                Direction.Up => Direction.Down,
+                Direction.Down => Direction.Up,
+                Direction.Left => Direction.Right,
+                Direction.Right => Direction.Left,
+                _ => dir
+            };
+        }
         
         public static MaskCfg GetCfg(this MaskType mask)
         {
@@ -93,7 +105,10 @@ namespace GGJ
         [LabelText("当前得分")]
         public float curScore = 0;
 
-        public Vector2 FinalSpeed => (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
+        private float _stunEndTime;
+
+        public bool IsStunned => Time.time < _stunEndTime;
+        public Vector2 FinalSpeed => IsStunned ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
 
         public Action UpdateUI;
         
@@ -204,12 +219,29 @@ namespace GGJ
             curScore += s * scoreMulti;
             UpdateUI?.Invoke();
         }
+
+        public void AddScore(float s)
+        {
+            curScore += s;
+            UpdateUI?.Invoke();
+        }
+
+        public void LoseScore(float s)
+        {
+            curScore = Mathf.Max(0f, curScore - s);
+            UpdateUI?.Invoke();
+        }
+
+        private void StartStun(float duration)
+        {
+            _stunEndTime = Time.time + duration;
+        }
         
         public void SetInput(Direction dir)
         {
             curDirection = dir;
             var vec = dir.GetVec();
-            transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90);
+            //transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90);
         }
 
         public void RemoveCurMask()
@@ -261,12 +293,28 @@ namespace GGJ
             return currentMask != MaskType.Tiger;
         }
 
-        //TODO 吃掉后的额外规则..死亡？复活？冷却？得分？
+        /// <summary> 吃人者 A 调用：A 眩晕、偷 B 的分数，B 扣分、方向反向并被弹开。不摘面具。 </summary>
         public void DoEat(PlayerController other)
         {
-            GetScore(other.curScore * 0.5f);
-            RemoveCurMask();
-            other.RemoveCurMask();
+            var cfg = GameCfg.Instance;
+            float stealAmount = other.curScore * cfg.EatStealRatio;
+            stealAmount = Mathf.Min(stealAmount, other.curScore);
+
+            AddScore(stealAmount);
+            other.LoseScore(stealAmount);
+            StartStun(cfg.EatStunDuration);
+
+            other.curDirection = other.curDirection.Reverse();
+            var dir = other.transform.position - transform.position;
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                dir.Normalize();
+                float push = cfg.EatPushDistance * Utils.GridSize;
+                other.rig.MovePosition(other.rig.position + (Vector2)dir * push);
+            }
+            var vec = other.curDirection.GetVec();
+            other.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90);
+            other.UpdateUI?.Invoke();
         }
 
         public bool DirHasFood()
