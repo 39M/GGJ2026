@@ -154,8 +154,12 @@ namespace GGJ
             Debug.Log($"[GameEventSystem] 波次 {currentWave} 结束！");
             OnWaveEnd?.Invoke(currentWave);
             
-            // TODO: 波次结算逻辑（TBD）
-            // ExecuteWaveSettlement();
+            // 检查游戏是否结束
+            if (EliminationManager.Instance != null && EliminationManager.Instance.IsGameOver)
+            {
+                Debug.Log("[GameEventSystem] 游戏已结束，停止波次循环");
+                return;
+            }
             
             // 自动开始下一波次
             if (isRunning)
