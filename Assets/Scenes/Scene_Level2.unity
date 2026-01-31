@@ -1226,9 +1226,9 @@ MonoBehaviour:
   blockedColor: {r: 1, g: 0, b: 0, a: 0.23529412}
   connectionColor: {r: 0, g: 0, b: 1, a: 1}
   mapData:
-    width: 50
-    height: 50
-    origin: {x: -25, y: -25}
+    width: 32
+    height: 26
+    origin: {x: -16, y: -6}
     cellSize: 1
 --- !u!1001 &457531272
 PrefabInstance:
