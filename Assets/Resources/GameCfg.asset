@@ -351,6 +351,7 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 3716861478852819177, guid: a1be37b8b87d0174a9b8ec32226ea5ba, type: 3}
   MaskPrefab: {fileID: 3275814422875547497, guid: 4fe415e934e15bb418dd79bfa9ffbc92, type: 3}
   CoinPrefab: {fileID: 8409749159196456642, guid: 1ae183a55e78bca48a7a14d907ff902a, type: 3}
+  BigCoinPrefab: {fileID: 6317235755775435011, guid: 00dda75df64a7a642a6e382d50821b17, type: 3}
   BulletSpeed: 40
   FireMaskCooldown: 0.5
   FiredByPickupBlockDuration: 2
@@ -362,5 +363,6 @@ MonoBehaviour:
     SpawnMode: 1
     FirstWaveCoins: 20
     CoinsPerWave: 40
+    BigCoinRatio: 0.1
     CoinCheckRadius: 0.4
     MaxSpawnAttempts: 100

@@ -53,7 +53,7 @@ namespace GGJ
     [Serializable, HideReferenceObjectPicker]
     public class GameEventConfig
     {
-        [LabelText("每波持续时间（秒）")]
+        [LabelText("每波持续时间（秒）（请在关卡里 Override）")]
         public float WaveDuration = 30f;
 
         [LabelText("生成模式")]
@@ -64,6 +64,10 @@ namespace GGJ
         
         [LabelText("每波金币数量")]
         public int CoinsPerWave = 10;
+        
+        [LabelText("大金币生成比例")]
+        [Range(0f, 1f)]
+        public float BigCoinRatio = 0.1f;
         
         [LabelText("避免重叠的检测半径")]
         public float CoinCheckRadius = 0.4f;
@@ -87,6 +91,10 @@ namespace GGJ
         [TabGroup("基础配置")]
         [LabelText("金币Prefab")]
         public Coin CoinPrefab;
+        
+        [TabGroup("基础配置")]
+        [LabelText("大金币Prefab")]
+        public Coin BigCoinPrefab;
         
         [TabGroup("基础配置")]
         [LabelText("发射面具速度")]
