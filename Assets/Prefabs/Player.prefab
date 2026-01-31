@@ -341,6 +341,7 @@ MonoBehaviour:
   curDirection: 1
   curScore: 0
   dropMinDistance: 3
+  fireSpawnOffset: 0.6
 --- !u!50 &5734967513558000539
 Rigidbody2D:
   serializedVersion: 5
@@ -366,5 +367,5 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4

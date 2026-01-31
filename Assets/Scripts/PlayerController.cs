@@ -260,13 +260,18 @@ namespace GGJ
             UpdateUI?.Invoke();
         }
 
+        /// <summary> 发射时面具生成位置相对玩家的偏移(格)，沿发射方向，避免刚生成就与玩家重叠触发小碰撞。 </summary>
+        public float fireSpawnOffset = 0.6f;
+
         /// <summary> 发射当前戴的面具。 </summary>
         public void FireMask()
         {
             if (currentMask == MaskType.None) return;
-            var mask = Instantiate(GameCfg.Instance.MaskPrefab, transform.position, Quaternion.identity).GetComponent<MaskObject>();
+            var dir = curDirection.GetVec();
+            var spawnPos = (Vector2)transform.position + dir * (Utils.GridSize * fireSpawnOffset);
+            var mask = Instantiate(GameCfg.Instance.MaskPrefab, spawnPos, Quaternion.identity).GetComponent<MaskObject>();
             mask.owner = this;
-            mask.Init(currentMask, curDirection.GetVec() * GameCfg.Instance.BulletSpeed, this);
+            mask.Init(currentMask, dir * GameCfg.Instance.BulletSpeed, this);
             RemoveCurMask();
         }
 
