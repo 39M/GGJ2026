@@ -278,28 +278,36 @@ namespace GGJ
         }
         
         /// <summary>
-        /// 淘汰玩家
+        /// 淘汰玩家（仅启动淘汰流程，状态变更在踢飞时执行）
         /// </summary>
         private void EliminatePlayer(PlayerController player)
         {
-            // 停止闪红协程
-            StopFlashCoroutine(player.PlayerIdx);
-            
-            _markedPlayerIndex = -1;
+            // 从存活列表移除
             _alivePlayers.Remove(player);
-            player.SetMarked(false);
-            player.SetEliminated(true);
             
-            OnPlayerEliminated?.Invoke(player.PlayerIdx);
-            
-            // 播放踢飞效果
+            // 播放踢飞效果（状态变更在协程内执行）
             StartCoroutine(EliminateEffect(player));
             
             // 检查游戏是否结束
             if (_alivePlayers.Count <= 1)
             {
-                StartCoroutine(DelayedEndGame(1f));
+                StartCoroutine(DelayedEndGame(freezeDuration + zoomOutDuration + 0.5f));
             }
+        }
+        
+        /// <summary>
+        /// 应用淘汰状态（在踢飞时调用）
+        /// </summary>
+        private void ApplyEliminateState(PlayerController player)
+        {
+            // 停止闪红协程
+            StopFlashCoroutine(player.PlayerIdx);
+            
+            _markedPlayerIndex = -1;
+            player.SetMarked(false);
+            player.SetEliminated(true);
+            
+            OnPlayerEliminated?.Invoke(player.PlayerIdx);
         }
         
         /// <summary>
@@ -345,30 +353,29 @@ namespace GGJ
             
             var mainCamera = Camera.main;
             
-            // 保存原始相机尺寸
+            // 保存原始状态
             _originalCameraSize = mainCamera.orthographicSize;
             _originalTimeScale = Time.timeScale;
-            
-            // ========== 阶段1：时停 + 镜头拉近 ==========
-            
-            // 时间停止
-            Time.timeScale = 0;
-            Time.fixedDeltaTime = 0;
+            Vector3 originalCameraPos = mainCamera.transform.position;
             Vector2 cameraCenter = mainCamera.transform.position;
 
-            // 镜头拉近到被淘汰玩家（使用 unscaledTime 确保不受 timeScale 影响）
-            Vector3 targetCameraPos = new Vector3(player.transform.position.x, player.transform.position.y, mainCamera.transform.position.z);
-            Vector3 originalCameraPos = mainCamera.transform.position;
+            // ========== 阶段1：时停 + 镜头拉近（保持 UI 显示）==========
             
+            Time.timeScale = 0;
+            Time.fixedDeltaTime = 0;
+
+            Vector3 targetCameraPos = new Vector3(player.transform.position.x, player.transform.position.y, mainCamera.transform.position.z);
             mainCamera.transform.DOMove(targetCameraPos, zoomInDuration).SetUpdate(true).SetEase(Ease.OutCubic);
             mainCamera.DOOrthoSize(zoomInSize, zoomInDuration).SetUpdate(true).SetEase(Ease.OutCubic);
             
-            // 慢动作持续时间
             yield return new WaitForSecondsRealtime(freezeDuration);
             
-            // ========== 阶段2：踢飞动画 ==========
+            // ========== 阶段2：踢飞（此时应用淘汰状态）==========
             
-            // 计算踢飞方向（从屏幕中心向外）
+            // 应用淘汰状态（取消 mark，标记 eliminate）
+            ApplyEliminateState(player);
+            
+            // 计算踢飞方向
             Vector2 playerPos = player.transform.position;
             Vector2 direction = (playerPos - cameraCenter).normalized;
             if (direction.sqrMagnitude < 0.01f)
@@ -376,11 +383,11 @@ namespace GGJ
                 direction = Vector2.up;
             }
             
-            // 施加力踢飞（力度需要考虑慢动作）
+            // 施加力踢飞
             player.rig.linearVelocity = Vector2.zero;
             player.rig.AddForce(direction * eliminateForce, ForceMode2D.Impulse);
             
-            // 旋转效果（使用 unscaledTime）
+            // 旋转效果
             player.transform.DORotate(new Vector3(0, 0, 720), 0.5f, RotateMode.FastBeyond360)
                 .SetUpdate(true)
                 .SetLoops(-1)
@@ -388,11 +395,9 @@ namespace GGJ
             
             // ========== 阶段3：恢复正常 ==========
             
-            // 恢复时间缩放
             Time.timeScale = _originalTimeScale;
             Time.fixedDeltaTime = 0.02f;
             
-            // 镜头恢复
             mainCamera.transform.DOMove(originalCameraPos, zoomOutDuration).SetUpdate(true).SetEase(Ease.OutCubic);
             mainCamera.DOOrthoSize(_originalCameraSize, zoomOutDuration).SetUpdate(true).SetEase(Ease.OutCubic);
             

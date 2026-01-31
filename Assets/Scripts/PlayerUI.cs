@@ -143,10 +143,6 @@ namespace GGJ
             if (warningText != null)
             {
                 warningText.gameObject.SetActive(pc.IsMarked);
-                if (pc.IsMarked)
-                {
-                    warningText.text = "危险！下波垫底将被淘汰！";
-                }
             }
             
             // 如果被淘汰，隐藏整个UI
