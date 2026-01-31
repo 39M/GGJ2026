@@ -7,9 +7,14 @@ namespace GGJ
 {
     public class GameManager : MonoSingleton<GameManager>
     {
+        [Header("教学场景设置")]
+        [Tooltip("是否为教学场景(如果不是,所有检测逻辑都不会运行)")]
+        public bool enableTutorialCheck = true;
+        public float MaxWaveTime = 10f;
+
         public List<Transform> PlayerStart = new();
         public List<PlayerController> PlayerList = new();
-
+    
         public PlayerController GetPlayer(int idx)
         {
             if (idx < 0 || idx >= PlayerList.Count) return null;
@@ -18,6 +23,7 @@ namespace GGJ
         
         private void Start()
         {
+            GameCfg.Instance.EventConfig.WaveDuration = MaxWaveTime;
             var idx = 0;
             foreach (var start in PlayerStart)
             {

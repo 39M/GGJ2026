@@ -54,25 +54,18 @@ namespace GGJ
             if (coin != null)
                 return;
 
-            // 墙只认小碰撞：大碰撞碰到墙不处理，等小碰撞碰到再停
+            // 墙只认小碰撞：大碰撞碰到墙不处理，等小碰撞碰到再停；停后移到附近空地，避免卡墙里
             if (other.CompareTag("Wall"))
             {
-                Debug.Log($"MaskObject: Hit Wall by {(isLargeCollider ? "LargeCollider" : "SmallCollider")}");
                 if (isLargeCollider)
-                {
-                    Debug.Log("MaskObject: Ignoring wall hit on large collider.");
                     return;
-                }
                 rig.linearVelocity = Vector2.zero;
                 owner = null;
                 _isFired = false;
-                Debug.Log("MaskObject: Stopped moving after hitting wall.");
-                
                 if (largeCollider != null)
-                {
-                    Debug.Log("MaskObject: Disabling large collider after hitting wall.");
                     largeCollider.enabled = false;
-                }
+                var dropPos = Utils.FindNearbyEmptyPosition((Vector2)transform.position);
+                rig.MovePosition(dropPos);
                 return;
             }
 

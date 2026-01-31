@@ -72,6 +72,37 @@ namespace GGJ
         {
             return GameCfg.Instance.GetMaskCfg(mask);
         }
+
+        /// <summary> 在给定中心附近找一个空地：该点无碰撞体，且该点周围半径内无墙，避免掉落物/面具与墙重叠。 </summary>
+        /// <param name="center">中心点</param>
+        /// <param name="wallCheckRadius">候选点周围检测墙的半径，需略大于掉落物碰撞体（如面具约 0.5）</param>
+        public static Vector2 FindNearbyEmptyPosition(Vector2 center, float wallCheckRadius = 0.5f)
+        {
+            var grid = GridSize;
+            var offsets = new[]
+            {
+                new Vector2(grid, 0), new Vector2(-grid, 0), new Vector2(0, grid), new Vector2(0, -grid),
+                new Vector2(grid, grid), new Vector2(-grid, grid), new Vector2(grid, -grid), new Vector2(-grid, -grid),
+                new Vector2(2 * grid, 0), new Vector2(-2 * grid, 0), new Vector2(0, 2 * grid), new Vector2(0, -2 * grid),
+            };
+            foreach (var off in offsets)
+            {
+                var p = center + off;
+                if (Physics2D.OverlapPoint(p)) continue;
+                if (HasWallWithinRadius(p, wallCheckRadius)) continue;
+                return p;
+            }
+            return center + new Vector2(grid, 0);
+        }
+
+        /// <summary> 该点半径内是否存在墙（Tag=Wall）。 </summary>
+        public static bool HasWallWithinRadius(Vector2 point, float radius)
+        {
+            var hits = Physics2D.OverlapCircleAll(point, radius);
+            foreach (var col in hits)
+                if (col.CompareTag("Wall")) return true;
+            return false;
+        }
     }
     
 
@@ -141,26 +172,6 @@ namespace GGJ
             UpdateUI?.Invoke();
         }
 
-        /// <summary> 在玩家附近找一个空地位置（无碰撞体的点），用于掉落面具。 </summary>
-        private Vector2 FindNearbyEmptyPosition()
-        {
-            var center = (Vector2)transform.position;
-            var grid = Utils.GridSize;
-            var offsets = new[]
-            {
-                new Vector2(grid, 0), new Vector2(-grid, 0), new Vector2(0, grid), new Vector2(0, -grid),
-                new Vector2(grid, grid), new Vector2(-grid, grid), new Vector2(grid, -grid), new Vector2(-grid, -grid),
-                new Vector2(2 * grid, 0), new Vector2(-2 * grid, 0), new Vector2(0, 2 * grid), new Vector2(0, -2 * grid),
-            };
-            foreach (var off in offsets)
-            {
-                var p = center + off;
-                if (!Physics2D.OverlapPoint(p))
-                    return p;
-            }
-            return center + new Vector2(grid, 0);
-        }
-
         [LabelText("掉落面具最小距离(格)")]
         public float dropMinDistance = 3f;
         /// <summary> 找一个离玩家足够远的空位用于掉落面具，避免刚掉就被自己触发拾取。 </summary>
@@ -181,8 +192,9 @@ namespace GGJ
             {
                 if (off.magnitude < minDist) continue;
                 var p = center + off;
-                if (!Physics2D.OverlapPoint(p))
-                    return p;
+                if (Physics2D.OverlapPoint(p)) continue;
+                if (Utils.HasWallWithinRadius(p, 0.6f)) continue;
+                return p;
             }
             return center + new Vector2(3 * grid, 0);
         }
@@ -436,7 +448,7 @@ namespace GGJ
             if (Time.time < _dropCoinNextTime) return;
             float amount = Mathf.Min(cfg.DropCoinAmount, curScore);
             if (amount <= 0f) return;
-            var pos = FindNearbyEmptyPosition();
+            var pos = Utils.FindNearbyEmptyPosition((Vector2)transform.position);
             var prefab = GameCfg.Instance.CoinPrefab;
             if (prefab == null) return;
             var coinObj = Instantiate(prefab.gameObject, pos, Quaternion.identity);
