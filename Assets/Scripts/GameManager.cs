@@ -27,6 +27,8 @@ namespace GGJ
                 PlayerList.Add(player);
                 idx++;
             }
+            
+            GameEventManager.Instance.StartGameEventManager();
         }
 
         public void Reload()
