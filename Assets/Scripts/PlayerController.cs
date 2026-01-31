@@ -300,7 +300,54 @@ namespace GGJ
             return !eatsBigOnly;
         }
 
-        /// <summary> 吃人者 A 调用：A 眩晕、偷 B 的分数，B 扣分、方向反向并被弹开。不摘面具。 </summary>
+        [Tooltip("被吃后逃离方向检测墙的射线长度(格)，该距离内有墙则该方向不选。")]
+        public float eatFleeWallCheckDistance = 2f;
+
+        /// <summary> 从 fromPosition 沿方向 dir 射线检测，短距离内是否碰到墙（忽略玩家）。 </summary>
+        private static bool HasWallInDirection(Vector2 fromPosition, Direction dir, float maxDistance, PlayerController ignoreA, PlayerController ignoreB)
+        {
+            var vec = dir.GetVec();
+            if (vec.sqrMagnitude < 0.01f) return true;
+            var hits = Physics2D.RaycastAll(fromPosition, vec, maxDistance);
+            foreach (var hit in hits)
+            {
+                if (!hit.collider) continue;
+                if (ignoreA != null && hit.collider.transform.IsChildOf(ignoreA.transform)) continue;
+                if (ignoreB != null && hit.collider.transform.IsChildOf(ignoreB.transform)) continue;
+                if (hit.collider.CompareTag("Wall")) return true;
+            }
+            return false;
+        }
+
+        /// <summary> 为被吃者选一个逃离吃人者的方向：优先与“远离吃人者”一致，且短距离内无墙。 </summary>
+        private Direction ChooseFleeDirection(PlayerController eaten)
+        {
+            var away = (Vector2)(eaten.transform.position - transform.position);
+            if (away.sqrMagnitude < 0.01f) away = Vector2.up;
+            away.Normalize();
+            float checkDist = eatFleeWallCheckDistance * Utils.GridSize;
+            var cardinals = new[] { Direction.Up, Direction.Down, Direction.Left, Direction.Right };
+            Direction best = Direction.Up;
+            float bestDot = -2f;
+            foreach (var d in cardinals)
+            {
+                if (HasWallInDirection((Vector2)eaten.transform.position, d, checkDist, this, eaten))
+                    continue;
+                float dot = Vector2.Dot(away, d.GetVec());
+                if (dot > bestDot) { bestDot = dot; best = d; }
+            }
+            if (bestDot <= -2f)
+            {
+                foreach (var d in cardinals)
+                {
+                    float dot = Vector2.Dot(away, d.GetVec());
+                    if (dot > bestDot) { bestDot = dot; best = d; }
+                }
+            }
+            return best;
+        }
+
+        /// <summary> 吃人者 A 调用：A 眩晕、偷 B 的分数，B 扣分，B 重新选择逃离方向（短距离无墙）并更新朝向。不摘面具、不位移推开。 </summary>
         public void DoEat(PlayerController other)
         {
             var cfg = GameCfg.Instance;
@@ -311,14 +358,7 @@ namespace GGJ
             other.LoseScore(stealAmount);
             StartStun(cfg.EatStunDuration);
 
-            other.curDirection = other.curDirection.Reverse();
-            var dir = other.transform.position - transform.position;
-            if (dir.sqrMagnitude > 0.01f)
-            {
-                dir.Normalize();
-                float push = cfg.EatPushDistance * Utils.GridSize;
-                other.rig.MovePosition(other.rig.position + (Vector2)dir * push);
-            }
+            other.curDirection = ChooseFleeDirection(other);
             var vec = other.curDirection.GetVec();
             other.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90);
             other.UpdateUI?.Invoke();
