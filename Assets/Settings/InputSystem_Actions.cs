@@ -1126,6 +1126,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Switch"",
+                    ""type"": ""Button"",
+                    ""id"": ""7a8b9c0d-1e2f-4a5b-8c6d-9e7f0a1b2c3d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1137,6 +1146,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9c8b7a6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Switch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1234,6 +1254,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Switch"",
+                    ""type"": ""Button"",
+                    ""id"": ""8b9c0d1e-2f3a-4b5c-9d6e-0f8a1b2c3d4e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1245,6 +1274,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a"",
+                    ""path"": ""<Keyboard>/rightShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Switch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1388,6 +1428,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_1_Down = m_Player_1.FindAction("Down", throwIfNotFound: true);
         m_Player_1_Left = m_Player_1.FindAction("Left", throwIfNotFound: true);
         m_Player_1_Right = m_Player_1.FindAction("Right", throwIfNotFound: true);
+        m_Player_1_Switch = m_Player_1.FindAction("Switch", throwIfNotFound: true);
         // Player_2
         m_Player_2 = asset.FindActionMap("Player_2", throwIfNotFound: true);
         m_Player_2_Attack = m_Player_2.FindAction("Attack", throwIfNotFound: true);
@@ -1395,6 +1436,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_2_Down = m_Player_2.FindAction("Down", throwIfNotFound: true);
         m_Player_2_Left = m_Player_2.FindAction("Left", throwIfNotFound: true);
         m_Player_2_Right = m_Player_2.FindAction("Right", throwIfNotFound: true);
+        m_Player_2_Switch = m_Player_2.FindAction("Switch", throwIfNotFound: true);
     }
 
     ~@InputSystem_Actions()
@@ -1862,6 +1904,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_1_Down;
     private readonly InputAction m_Player_1_Left;
     private readonly InputAction m_Player_1_Right;
+    private readonly InputAction m_Player_1_Switch;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player_1".
     /// </summary>
@@ -1893,6 +1936,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player_1/Right".
         /// </summary>
         public InputAction @Right => m_Wrapper.m_Player_1_Right;
+        /// <summary>
+        /// Provides access to the underlying input action "Player_1/Switch".
+        /// </summary>
+        public InputAction @Switch => m_Wrapper.m_Player_1_Switch;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1934,6 +1981,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Right.started += instance.OnRight;
             @Right.performed += instance.OnRight;
             @Right.canceled += instance.OnRight;
+            @Switch.started += instance.OnSwitch;
+            @Switch.performed += instance.OnSwitch;
+            @Switch.canceled += instance.OnSwitch;
         }
 
         /// <summary>
@@ -1960,6 +2010,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Right.started -= instance.OnRight;
             @Right.performed -= instance.OnRight;
             @Right.canceled -= instance.OnRight;
+            @Switch.started -= instance.OnSwitch;
+            @Switch.performed -= instance.OnSwitch;
+            @Switch.canceled -= instance.OnSwitch;
         }
 
         /// <summary>
@@ -2002,6 +2055,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_2_Down;
     private readonly InputAction m_Player_2_Left;
     private readonly InputAction m_Player_2_Right;
+    private readonly InputAction m_Player_2_Switch;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player_2".
     /// </summary>
@@ -2033,6 +2087,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player_2/Right".
         /// </summary>
         public InputAction @Right => m_Wrapper.m_Player_2_Right;
+        /// <summary>
+        /// Provides access to the underlying input action "Player_2/Switch".
+        /// </summary>
+        public InputAction @Switch => m_Wrapper.m_Player_2_Switch;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -2074,6 +2132,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Right.started += instance.OnRight;
             @Right.performed += instance.OnRight;
             @Right.canceled += instance.OnRight;
+            @Switch.started += instance.OnSwitch;
+            @Switch.performed += instance.OnSwitch;
+            @Switch.canceled += instance.OnSwitch;
         }
 
         /// <summary>
@@ -2100,6 +2161,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Right.started -= instance.OnRight;
             @Right.performed -= instance.OnRight;
             @Right.canceled -= instance.OnRight;
+            @Switch.started -= instance.OnSwitch;
+            @Switch.performed -= instance.OnSwitch;
+            @Switch.canceled -= instance.OnSwitch;
         }
 
         /// <summary>
@@ -2389,6 +2453,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRight(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Switch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSwitch(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player_2" which allows adding and removing callbacks.
@@ -2432,5 +2503,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRight(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Switch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSwitch(InputAction.CallbackContext context);
     }
 }

@@ -69,14 +69,17 @@ namespace GGJ
         public Rigidbody2D rig;
         public SpriteRenderer mainSprite;
         
-        /// <summary> 面具列表：索引 0 = 当前戴的，1.. = 背包（越靠后越古早）。当前戴的也在本列表中。 </summary>
-        [LabelText("面具列表(0=当前 1..=背包)")]
+        /// <summary> 面具列表：0号位、1号位… 切换键会按 0→1→2→… 循环戴。 </summary>
+        [LabelText("面具列表")]
         public List<MaskType> maskBag = new List<MaskType> { MaskType.None };
-        [LabelText("背包容量(包含当前带的)")]
+        [LabelText("背包容量(包含当前戴的)")]
         public int bagCapacity = 3;
+        /// <summary> 当前戴的是第几号位（0、1、2…），切换键会切到下一个号位。 </summary>
+        [LabelText("当前佩戴槽位索引")]
+        public int currentWornIndex = 0;
 
-        /// <summary> 当前戴在脸上的面具，即 maskBag[0]。 </summary>
-        public MaskType currentMask => (maskBag != null && maskBag.Count > 0) ? maskBag[0] : MaskType.None;
+        /// <summary> 当前戴在脸上的面具，即 maskBag[currentWornIndex]。 </summary>
+        public MaskType currentMask => (maskBag != null && maskBag.Count > 0) ? maskBag[Mathf.Clamp(currentWornIndex, 0, maskBag.Count - 1)] : MaskType.None;
         /// <summary> 背包里下一个面具（摘下当前后会戴上的），供 UI 等使用。 </summary>
         public MaskType bagPreviewMask => (maskBag != null && maskBag.Count > 1) ? maskBag[1] : MaskType.None;
         [LabelText("基础速度")] 
@@ -94,22 +97,16 @@ namespace GGJ
 
         public Action UpdateUI;
         
+        /// <summary> 把指定面具设为当前佩戴槽位并应用属性（速度、层级等）。 </summary>
         public void SetCurrentMask(MaskType mask)
         {
-            if (maskBag == null)
+            if (maskBag == null) maskBag = new List<MaskType>();
+            while (maskBag.Count <= currentWornIndex)
             {
-                maskBag = new List<MaskType>();
+                Debug.LogWarning("Mask bag size less than current worn index, expanding bag with None masks.");
+                maskBag.Add(MaskType.None);
             }
-
-            if (maskBag.Count == 0)
-            {
-                maskBag.Add(mask);
-            }
-            else
-            {
-                maskBag[0] = mask;
-            }
-            
+            maskBag[currentWornIndex] = mask;
             var cfg = mask.GetCfg();
             speed = cfg.Speed;
             eatSpeed = cfg.EatSpeed;
@@ -153,24 +150,27 @@ namespace GGJ
         {
             Debug.Log($"Player {PlayerIdx} got mask {mask}");
             if (maskBag == null) maskBag = new List<MaskType> { MaskType.None };
-            
-            // 新面具插到最前（成为当前），原当前自然退到 index 1
+            // 新面具塞到 0 号位并立刻戴上，其余往后顺移
             maskBag.Insert(0, mask);
-            
-            // 若原先没有面具，列表可能是 [None]，插入后为 [mask, None]，去掉末尾的 None
             if (maskBag.Count > 1 && maskBag[maskBag.Count - 1] == MaskType.None)
-            {
                 maskBag.RemoveAt(maskBag.Count - 1);
-            }
-            
-            // 背包满时丢弃最古早的（列表最后一个）
             while (maskBag.Count > bagCapacity)
             {
                 var drop = maskBag[maskBag.Count - 1];
                 maskBag.RemoveAt(maskBag.Count - 1);
                 DropMaskAtNearbyEmpty(drop);
             }
+            currentWornIndex = 0;
             SetCurrentMask(maskBag[0]);
+            UpdateUI?.Invoke();
+        }
+
+        /// <summary> 切换键：戴上下一个槽位的面具（0→1→2→… 循环）。 </summary>
+        public void SwitchMask()
+        {
+            if (maskBag == null || maskBag.Count == 0) return;
+            currentWornIndex = (currentWornIndex + 1) % maskBag.Count;
+            SetCurrentMask(maskBag[currentWornIndex]);
             UpdateUI?.Invoke();
         }
         
@@ -189,23 +189,21 @@ namespace GGJ
 
         public void RemoveCurMask()
         {
-            if (maskBag == null || maskBag.Count <= 1)
+            if (maskBag == null || maskBag.Count == 0) return;
+            int idx = Mathf.Clamp(currentWornIndex, 0, maskBag.Count - 1);
+            maskBag.RemoveAt(idx);
+            currentWornIndex = 0;
+            if (maskBag.Count == 0)
             {
-                if (maskBag != null)
-                {
-                    maskBag.Clear();
-                }
-                maskBag = new List<MaskType> { MaskType.None };
+                maskBag.Add(MaskType.None);
                 SetCurrentMask(MaskType.None);
             }
             else
-            {
-                maskBag.RemoveAt(0);
                 SetCurrentMask(maskBag[0]);
-            }
             UpdateUI?.Invoke();
         }
-        
+
+        /// <summary> 发射当前戴的面具。 </summary>
         public void FireMask()
         {
             if (currentMask == MaskType.None) return;
@@ -219,6 +217,7 @@ namespace GGJ
             PlayerIdx = idx;
             name = $"Player_{PlayerIdx}";
             maskBag = new List<MaskType> { MaskType.None };
+            currentWornIndex = 0;
             SetCurrentMask(MaskType.None);
             UpdateUI?.Invoke();
         }
