@@ -14,9 +14,6 @@ namespace GGJ
 
         /// <summary> 发射者：谁发射的这枚面具，撞墙后也不清除。仅在该时间内禁止发射者拾取，避免墙边立刻捡回。 </summary>
         private PlayerController _firedBy;
-        [Tooltip("发射者在此时间内不能拾取该面具(秒)，避免墙边立刻捡回；超时后可捡。掉落的面具 _firedBy 为 null 不受影响。")]
-        public static float FiredByPickupBlockDuration = 2f;
-
         [Tooltip("大碰撞体子物体上的 Collider(发射时命中玩家用)，撞墙后由逻辑关闭。小碰撞在 SmallCollider 子物体上。")]
         public Collider2D largeCollider;
 
@@ -31,7 +28,10 @@ namespace GGJ
         public void Init(MaskType type, Vector2 speed = default, PlayerController own = null)
         {
             mask = type;
-            mainSprite.color = mask.GetCfg().TestColor;
+            var cfg = mask.GetCfg();
+            if (cfg.MaskSprite != null)
+                mainSprite.sprite = cfg.MaskSprite;
+            mainSprite.color = cfg.TestColor;
             rig.linearVelocity = speed;
             owner = own;
             _isFired = speed.sqrMagnitude > 0.01f;
@@ -88,8 +88,9 @@ namespace GGJ
                 Debug.Log("MaskObject: Triggered by owner, ignoring.");
                 return;
             }
-            // 仅对发射者限时：FiredByPickupBlockDuration 秒内不能拾取（含刚发射同位置 0.3s + 墙边立刻捡回）。其他玩家无时间限制，打中即戴。
-            if (pc == _firedBy && Time.time - _firedTime < FiredByPickupBlockDuration)
+            // 仅对发射者限时：配置的秒数内不能拾取（含刚发射同位置 + 墙边立刻捡回）。其他玩家无时间限制，打中即戴。
+            float blockDuration = GameCfg.Instance.FiredByPickupBlockDuration;
+            if (pc == _firedBy && Time.time - _firedTime < blockDuration)
             {
                 Debug.Log("MaskObject: Triggered by firedBy within block duration, ignoring.");
                 return;
