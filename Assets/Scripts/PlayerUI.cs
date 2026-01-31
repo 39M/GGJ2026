@@ -22,7 +22,8 @@ namespace GGJ
 
         private void UpdateUI()
         {
-            bag.color = pc.bagMask.GetCfg().TestColor;
+            var preview = pc.bagPreviewMask;
+            bag.color = preview == MaskType.None ? Color.gray : preview.GetCfg().TestColor;
             score.text = "Score : " + pc.curScore;
         }
     }
