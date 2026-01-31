@@ -128,7 +128,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4883529807908286692}
@@ -332,13 +332,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   rig: {fileID: 5734967513558000539}
   mainSprite: {fileID: 6003246291998489048}
-  currentMask: 0
-  bagMask: 0
+  maskBag: 00000000
+  bagCapacity: 3
+  currentWornIndex: 0
   speed: 1
   eatSpeed: 0
   scoreMulti: 1
   curDirection: 1
   curScore: 0
+  dropMinDistance: 3
 --- !u!50 &5734967513558000539
 Rigidbody2D:
   serializedVersion: 5
