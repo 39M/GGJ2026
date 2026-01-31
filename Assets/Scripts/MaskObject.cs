@@ -58,15 +58,24 @@ namespace GGJ
             if (coin != null)
                 return;
 
+            // 墙只认小碰撞：大碰撞碰到墙不处理，等小碰撞碰到再停
             if (other.CompareTag("Wall"))
             {
-                if (!isLargeCollider)
+                //打印Mask碰到墙壁的日志
+                Debug.Log($"Mask {mask} hit wall. isLargeCollider={isLargeCollider}");
+
+                if (isLargeCollider)
                 {
-                    rig.linearVelocity = Vector2.zero;
-                    owner = null;
-                    _isFired = false;
-                    if (largeCollider != null)
-                        largeCollider.enabled = false;
+                    Debug.Log("Large collider hit wall, ignoring.");
+                    return;
+                }
+                rig.linearVelocity = Vector2.zero;
+                owner = null;
+                _isFired = false;
+                if (largeCollider != null)
+                {
+                    Debug.Log("Disabling large collider after hitting wall.");
+                    largeCollider.enabled = false;
                 }
                 return;
             }
