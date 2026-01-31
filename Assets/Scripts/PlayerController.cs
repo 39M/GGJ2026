@@ -107,6 +107,7 @@ namespace GGJ
 
         private float _stunEndTime;
         private float _dropCoinNextTime;
+        private float _lastFireMaskTime = -999f;
 
         public bool IsStunned => Time.time < _stunEndTime;
         public Vector2 FinalSpeed => IsStunned ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
@@ -270,12 +271,15 @@ namespace GGJ
         public void FireMask()
         {
             if (currentMask == MaskType.None) return;
+            float cd = GameCfg.Instance.FireMaskCooldown;
+            if (cd > 0f && Time.time - _lastFireMaskTime < cd) return;
             var dir = curDirection.GetVec();
             var spawnPos = (Vector2)transform.position + dir * (Utils.GridSize * fireSpawnOffset);
             var mask = Instantiate(GameCfg.Instance.MaskPrefab, spawnPos, Quaternion.identity).GetComponent<MaskObject>();
             mask.owner = this;
             mask.Init(currentMask, dir * GameCfg.Instance.BulletSpeed, this);
             RemoveCurMask();
+            _lastFireMaskTime = Time.time;
         }
 
         public void InitPlayer(int idx)
