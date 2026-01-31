@@ -17,7 +17,7 @@ namespace GGJ
         [Tooltip("发射者在此时间内不能拾取该面具(秒)，避免墙边立刻捡回；超时后可捡。掉落的面具 _firedBy 为 null 不受影响。")]
         public static float FiredByPickupBlockDuration = 2f;
 
-        [Tooltip("大碰撞体(发射时命中玩家用)，不填则只有根上的小碰撞")]
+        [Tooltip("大碰撞体子物体上的 Collider(发射时命中玩家用)，撞墙后由逻辑关闭。小碰撞在 SmallCollider 子物体上。")]
         public Collider2D largeCollider;
 
         private bool _isFired;
@@ -44,11 +44,7 @@ namespace GGJ
                 largeCollider.enabled = _isFired;
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
-        {
-            OnColliderTriggered(other, false);
-        }
-
+        /// <summary> 由子物体 SmallCollider/LargeCollider 上的 MaskColliderForwarder 调用，isLargeCollider 由转发者标明。 </summary>
         public void OnColliderTriggered(Collider2D other, bool isLargeCollider)
         {
             if (other.CompareTag("Mask"))
@@ -61,22 +57,13 @@ namespace GGJ
             // 墙只认小碰撞：大碰撞碰到墙不处理，等小碰撞碰到再停
             if (other.CompareTag("Wall"))
             {
-                //打印Mask碰到墙壁的日志
-                Debug.Log($"Mask {mask} hit wall. isLargeCollider={isLargeCollider}");
-
                 if (isLargeCollider)
-                {
-                    Debug.Log("Large collider hit wall, ignoring.");
                     return;
-                }
                 rig.linearVelocity = Vector2.zero;
                 owner = null;
                 _isFired = false;
                 if (largeCollider != null)
-                {
-                    Debug.Log("Disabling large collider after hitting wall.");
                     largeCollider.enabled = false;
-                }
                 return;
             }
 
