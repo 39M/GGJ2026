@@ -106,6 +106,7 @@ namespace GGJ
         public float curScore = 0;
 
         private float _stunEndTime;
+        private float _dropCoinNextTime;
 
         public bool IsStunned => Time.time < _stunEndTime;
         public Vector2 FinalSpeed => IsStunned ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
@@ -128,6 +129,8 @@ namespace GGJ
             scoreMulti = cfg.Score;
             gameObject.SetAllLayer(cfg.Layer);
             mainSprite.color = cfg.TestColor;
+            if (cfg.DropCoinInterval > 0f)
+                _dropCoinNextTime = Time.time + cfg.DropCoinInterval;
             UpdateUI?.Invoke();
         }
 
@@ -374,7 +377,35 @@ namespace GGJ
         }
         
 
+        /// <summary> 戴有“掉落金币”面具时，每隔间隔扣除分数并在脚下附近生成可拾取金币。 </summary>
+        private void TryDropCoinByMask()
+        {
+            if (currentMask == MaskType.None) return;
+            var cfg = currentMask.GetCfg();
+            if (cfg.DropCoinInterval <= 0f || cfg.DropCoinAmount <= 0f) return;
+            if (Time.time < _dropCoinNextTime) return;
+            float amount = Mathf.Min(cfg.DropCoinAmount, curScore);
+            if (amount <= 0f) return;
+            var pos = FindNearbyEmptyPosition();
+            var prefab = GameCfg.Instance.CoinPrefab;
+            if (prefab == null) return;
+            var coinObj = Instantiate(prefab.gameObject, pos, Quaternion.identity);
+            var coin = coinObj.GetComponent<Coin>();
+            if (coin != null)
+            {
+                coin.score = amount;
+                coin.coinType = CoinType.Small;
+            }
+            LoseScore(amount);
+            _dropCoinNextTime = Time.time + cfg.DropCoinInterval;
+        }
+
         #region Unity
+
+        private void Update()
+        {
+            TryDropCoinByMask();
+        }
 
         private void OnCollisionEnter2D(Collision2D other)
         {

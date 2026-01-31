@@ -24,6 +24,11 @@ namespace GGJ
         [LabelText("只能吃大金币")]
         public bool OnlyEatBigCoin;
 
+        [LabelText("掉落金币间隔(秒)，0=不掉落")]
+        public float DropCoinInterval;
+        [LabelText("每次掉落金币数(分数)")]
+        public float DropCoinAmount;
+
         public LayerMask Layer => CanFly ? LayerMask.NameToLayer("Bird") : LayerMask.NameToLayer("Default");
     }
     
