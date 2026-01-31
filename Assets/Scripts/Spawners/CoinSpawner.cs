@@ -180,7 +180,19 @@ namespace GGJ
         /// </summary>
         private Coin SpawnCoinAt(Vector2 position)
         {
-            var coinPrefab = GameCfg.Instance.CoinPrefab;
+            var gameCfg = GameCfg.Instance;
+            var config = gameCfg.EventConfig;
+            
+            // 根据配置的比例决定生成大金币还是小金币
+            bool isBigCoin = Random.value < config.BigCoinRatio;
+            var coinPrefab = isBigCoin ? gameCfg.BigCoinPrefab : gameCfg.CoinPrefab;
+            
+            // 如果大金币预制体未配置，回退到普通金币
+            if (coinPrefab == null)
+            {
+                coinPrefab = gameCfg.CoinPrefab;
+            }
+            
             if (coinPrefab == null)
             {
                 Debug.LogError("[CoinSpawner] 金币预制体未配置！");

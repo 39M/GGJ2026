@@ -46,13 +46,14 @@ namespace GGJ
             int N = OverrideHumanPlayerCount > 0
                 ? Mathf.Clamp(OverrideHumanPlayerCount, 1, 4)
                 : Mathf.Clamp(NumberOfHumanPlayers, 1, 4);
-            N = Mathf.Min(N, PlayerStart.Count, AIStart.Count);
-            if (N <= 0) return;
+            int humanCount = Mathf.Min(N, PlayerStart.Count);
+            int aiCount = (AIStart != null && AIStart.Count > 0) ? Mathf.Min(N, AIStart.Count) : 0;
+            if (humanCount <= 0) return;
 
             var playerSprites = GameCfg.Instance.PlayerSprites;
             int idx = 0;
 
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < humanCount; i++)
             {
                 var start = PlayerStart[i];
                 var go = Instantiate(GameCfg.Instance.PlayerPrefab.gameObject, start.position, Quaternion.identity);
@@ -65,7 +66,7 @@ namespace GGJ
                 idx++;
             }
 
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < aiCount; i++)
             {
                 var start = AIStart[i];
                 var go = Instantiate(GameCfg.Instance.PlayerPrefab.gameObject, start.position, Quaternion.identity);
