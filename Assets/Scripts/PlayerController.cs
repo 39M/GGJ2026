@@ -102,6 +102,7 @@ namespace GGJ
         
         public void GetMask(MaskType mask)
         {
+            Debug.Log($"Player {PlayerIdx} got mask {mask}");
             bagMask = currentMask;
             SetCurrentMask(mask);
             UpdateUI?.Invoke();

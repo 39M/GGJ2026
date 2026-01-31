@@ -8,6 +8,7 @@ TagManager:
   - Droplet
   - DeadZone
   - Wall
+  - Mask
   layers:
   - Default
   - TransparentFX

@@ -30,9 +30,22 @@ namespace GGJ
         {
             Debug.Log("MaskObject Triggered: " + other.name);
             
+            // 如果碰到的物体Tag带有Mask则忽略
+            if (other.CompareTag("Mask"))
+            {
+                return;
+            }
+            
             var coin = other.GetComponentInParent<Coin>();
-            if (coin != null) return;
+            if (coin != null)
+            {
+                Debug.Log($"Mask {mask} hit Coin");
+                return;
+            }
+            
+            
             var pc = other.GetComponentInParent<PlayerController>();
+            
             if (pc != null && pc != owner)
             {
                 // 打印面具被哪个玩家吃了
