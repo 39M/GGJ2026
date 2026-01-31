@@ -197,7 +197,9 @@ namespace GGJ
 
         private void OnAttackStart(InputAction.CallbackContext ctx, int playerIdx)
         {
-            GameManager.Instance.GetPlayer(playerIdx).FireMask();
+            var player = GameManager.Instance.GetPlayer(playerIdx);
+            if (player == null || IsAIControlled(player)) return;
+            player.FireMask();
 
             // 攻击震动 - 强度较高，时长较长
             var gamepad = GetPlayerGamepad(playerIdx);
@@ -207,7 +209,9 @@ namespace GGJ
 
         private void OnSwitchMask(int playerIdx)
         {
-            GameManager.Instance.GetPlayer(playerIdx).SwitchMask();
+            var player = GameManager.Instance.GetPlayer(playerIdx);
+            if (player == null || IsAIControlled(player)) return;
+            player.SwitchMask();
 
             // 切换震动 - 强度较轻，时长较短
             var gamepad = GetPlayerGamepad(playerIdx);
@@ -224,7 +228,15 @@ namespace GGJ
 
         private void OnMovePerform(Direction dir, int playerIdx)
         {
-            GameManager.Instance.GetPlayer(playerIdx).SetInput(dir);
+            var player = GameManager.Instance.GetPlayer(playerIdx);
+            if (player == null || IsAIControlled(player)) return;
+            player.SetInput(dir);
+        }
+
+        private static bool IsAIControlled(PlayerController player)
+        {
+            var ai = player.GetComponent<MaskAIController>();
+            return ai != null && ai.enabled;
         }
     }
 }

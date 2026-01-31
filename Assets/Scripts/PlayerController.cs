@@ -103,6 +103,21 @@ namespace GGJ
                 if (col.CompareTag("Wall")) return true;
             return false;
         }
+
+        /// <summary> 从 from 沿方向 dir 射线检测，maxDistance 内是否碰到墙。ignore 为 null 则不忽略任何碰撞体。 </summary>
+        public static bool HasWallInDirection(Vector2 from, Direction dir, float maxDistance, Transform ignore = null)
+        {
+            var vec = dir.GetVec();
+            if (vec.sqrMagnitude < 0.01f) return true;
+            var hits = Physics2D.RaycastAll(from, vec, maxDistance);
+            foreach (var hit in hits)
+            {
+                if (!hit.collider) continue;
+                if (ignore != null && hit.collider.transform.IsChildOf(ignore)) continue;
+                if (hit.collider.CompareTag("Wall")) return true;
+            }
+            return false;
+        }
     }
     
 

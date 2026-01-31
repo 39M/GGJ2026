@@ -14,6 +14,10 @@ namespace GGJ
 
         public List<Transform> PlayerStart = new();
         public List<PlayerController> PlayerList = new();
+
+        [Header("AI 玩家")]
+        [Tooltip("使用 AI 控制的玩家索引（0-based），如 [1] 表示第 2 个玩家为人机；运行时动态挂 MaskAIController")]
+        public List<int> AIPlayerIndices = new();
     
         public PlayerController GetPlayer(int idx)
         {
@@ -27,10 +31,19 @@ namespace GGJ
             var idx = 0;
             foreach (var start in PlayerStart)
             {
-                var player = Instantiate(GameCfg.Instance.PlayerPrefab.gameObject, start.position, Quaternion.identity).GetComponent<PlayerController>();
+                var go = Instantiate(GameCfg.Instance.PlayerPrefab.gameObject, start.position, Quaternion.identity);
+                var player = go.GetComponent<PlayerController>();
                 UIManager.Instance.InitPlayer(player, idx);
                 player.InitPlayer(idx);
                 PlayerList.Add(player);
+
+                if (AIPlayerIndices.Contains(idx))
+                {
+                    var ai = go.GetComponent<MaskAIController>();
+                    if (ai == null) ai = go.AddComponent<MaskAIController>();
+                    ai.enabled = true;
+                }
+
                 idx++;
             }
             
