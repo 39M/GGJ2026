@@ -24,6 +24,7 @@ namespace GGJ
         {
             ReloadBtn.onClick.AddListener(() => GameManager.Instance.Reload());
             
+            gameResultUI = transform.Find("GameResultPanel")?.GetComponent<GameResultUI>();
             // 隐藏结算界面
             if (gameResultUI != null)
             {
