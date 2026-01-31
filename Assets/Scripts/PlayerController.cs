@@ -209,7 +209,7 @@ namespace GGJ
         {
             curDirection = dir;
             var vec = dir.GetVec();
-            transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90);
+            //transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90);
         }
 
         public void RemoveCurMask()
