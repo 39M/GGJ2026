@@ -40,6 +40,12 @@ namespace GGJ
         
         /// <summary> 原始时间缩放 </summary>
         private float _originalTimeScale = 1f;
+        
+        /// <summary> 闪红协程字典，用于追踪和停止协程 </summary>
+        private Dictionary<int, Coroutine> _flashCoroutines = new Dictionary<int, Coroutine>();
+        
+        /// <summary> 玩家原始颜色字典 </summary>
+        private Dictionary<int, Color> _playerOriginalColors = new Dictionary<int, Color>();
 
         /// <summary> 当前被标记的玩家索引，-1表示无人被标记 </summary>
         private int _markedPlayerIndex = -1;
@@ -216,8 +222,18 @@ namespace GGJ
             OnPlayerMarked?.Invoke(player.PlayerIdx);
             Debug.Log($"[EliminationManager] 玩家 {player.PlayerIdx} 被标记为垫底，下波若仍垫底将被淘汰！");
             
-            // 触发闪红效果
-            StartCoroutine(FlashWarningEffect(player));
+            // 保存玩家原始颜色
+            if (!_playerOriginalColors.ContainsKey(player.PlayerIdx))
+            {
+                _playerOriginalColors[player.PlayerIdx] = player.mainSprite.color;
+            }
+            
+            // 停止之前的闪红协程（如果有）
+            StopFlashCoroutine(player.PlayerIdx);
+            
+            // 启动持续闪红效果
+            var coroutine = StartCoroutine(FlashWarningEffect(player));
+            _flashCoroutines[player.PlayerIdx] = coroutine;
         }
         
         /// <summary>
@@ -225,14 +241,40 @@ namespace GGJ
         /// </summary>
         private void CancelMark(int playerIndex)
         {
+            // 停止闪红协程
+            StopFlashCoroutine(playerIndex);
+            
+            // 恢复玩家原始颜色
             var player = GameManager.Instance.GetPlayer(playerIndex);
             if (player != null)
             {
                 player.SetMarked(false);
+                
+                // 恢复原始颜色
+                if (_playerOriginalColors.TryGetValue(playerIndex, out var originalColor))
+                {
+                    player.mainSprite.color = originalColor;
+                }
             }
+            
             OnPlayerUnmarked?.Invoke(playerIndex);
             _markedPlayerIndex = -1;
             Debug.Log($"[EliminationManager] 玩家 {playerIndex} 标记已取消");
+        }
+        
+        /// <summary>
+        /// 停止指定玩家的闪红协程
+        /// </summary>
+        private void StopFlashCoroutine(int playerIndex)
+        {
+            if (_flashCoroutines.TryGetValue(playerIndex, out var coroutine))
+            {
+                if (coroutine != null)
+                {
+                    StopCoroutine(coroutine);
+                }
+                _flashCoroutines.Remove(playerIndex);
+            }
         }
         
         /// <summary>
@@ -240,6 +282,9 @@ namespace GGJ
         /// </summary>
         private void EliminatePlayer(PlayerController player)
         {
+            // 停止闪红协程
+            StopFlashCoroutine(player.PlayerIdx);
+            
             _markedPlayerIndex = -1;
             _alivePlayers.Remove(player);
             player.SetMarked(false);
@@ -258,32 +303,36 @@ namespace GGJ
         }
         
         /// <summary>
-        /// 闪红警告效果协程
+        /// 闪红警告效果协程（持续闪烁直到取消标记）
         /// </summary>
         private IEnumerator FlashWarningEffect(PlayerController player)
         {
-            float elapsed = 0f;
             float flashInterval = 1f / warningFlashRate;
             bool isRed = false;
-            Color originalColor = player.mainSprite.color;
             
-            while (elapsed < warningFlashDuration && player.IsMarked)
+            // 获取原始颜色
+            Color originalColor;
+            if (!_playerOriginalColors.TryGetValue(player.PlayerIdx, out originalColor))
+            {
+                originalColor = player.mainSprite.color;
+            }
+            
+            // 持续闪烁直到玩家不再被标记
+            while (player != null && player.IsMarked && !player.IsEliminated)
             {
                 isRed = !isRed;
                 player.mainSprite.color = isRed ? Color.red : originalColor;
                 yield return new WaitForSeconds(flashInterval);
-                elapsed += flashInterval;
             }
             
-            // 恢复原色（如果还是标记状态则保持半红）
-            if (player.IsMarked)
-            {
-                player.mainSprite.color = Color.Lerp(originalColor, Color.red, 0.5f);
-            }
-            else
+            // 协程结束时恢复原色（如果玩家还存在且未被淘汰）
+            if (player != null && !player.IsEliminated)
             {
                 player.mainSprite.color = originalColor;
             }
+            
+            // 从字典中移除
+            _flashCoroutines.Remove(player.PlayerIdx);
         }
         
         /// <summary>
