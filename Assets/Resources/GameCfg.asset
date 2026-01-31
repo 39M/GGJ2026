@@ -73,7 +73,7 @@ MonoBehaviour:
       Data: 5
     - Name: EatSpeed
       Entry: 4
-      Data: 8
+      Data: 5
     - Name: Score
       Entry: 4
       Data: 1
@@ -93,6 +93,9 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: OnlyEatBigCoin
+      Entry: 5
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -131,7 +134,7 @@ MonoBehaviour:
       Data: 7
     - Name: EatSpeed
       Entry: 4
-      Data: 12
+      Data: 10
     - Name: Score
       Entry: 4
       Data: 1
@@ -157,6 +160,9 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: OnlyEatBigCoin
+      Entry: 5
+      Data: true
     - Name: 
       Entry: 8
       Data: 
@@ -195,10 +201,10 @@ MonoBehaviour:
       Data: 5
     - Name: EatSpeed
       Entry: 4
-      Data: 8
+      Data: 6
     - Name: Score
       Entry: 4
-      Data: 3
+      Data: 2
     - Name: CanFly
       Entry: 5
       Data: false
@@ -215,6 +221,9 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: OnlyEatBigCoin
+      Entry: 5
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -253,7 +262,7 @@ MonoBehaviour:
       Data: 4
     - Name: EatSpeed
       Entry: 4
-      Data: 6
+      Data: 7
     - Name: Score
       Entry: 4
       Data: 1
@@ -273,6 +282,9 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: OnlyEatBigCoin
+      Entry: 5
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -288,4 +300,13 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 3716861478852819177, guid: a1be37b8b87d0174a9b8ec32226ea5ba, type: 3}
   MaskPrefab: {fileID: 3275814422875547497, guid: 4fe415e934e15bb418dd79bfa9ffbc92, type: 3}
   CoinPrefab: {fileID: 8409749159196456642, guid: 1ae183a55e78bca48a7a14d907ff902a, type: 3}
-  BulletSpeed: 25
+  BulletSpeed: 40
+  EatStealRatio: 0.5
+  EatStunDuration: 1.5
+  EatPushDistance: 2
+  EventConfig:
+    WaveDuration: 60
+    FirstWaveCoins: 20
+    CoinsPerWave: 15
+    CoinCheckRadius: 0.4
+    MaxSpawnAttempts: 100

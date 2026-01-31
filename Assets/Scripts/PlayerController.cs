@@ -265,6 +265,7 @@ namespace GGJ
         {
             if (currentMask == MaskType.None) return;
             var mask = Instantiate(GameCfg.Instance.MaskPrefab, transform.position, Quaternion.identity).GetComponent<MaskObject>();
+            mask.owner = this;
             mask.Init(currentMask, curDirection.GetVec() * GameCfg.Instance.BulletSpeed, this);
             RemoveCurMask();
         }
@@ -285,12 +286,13 @@ namespace GGJ
             return currentMask.GetCfg().CanEat.Contains(other.currentMask);
         }
 
-        /// <summary> 当前面具能否吃该类型金币：老虎只能吃大金币，其它吃小金币。 </summary>
+        /// <summary> 当前面具能否吃该类型金币：由 MaskCfg.OnlyEatBigCoin 配置，勾选则只吃大金币，否则只吃小金币。 </summary>
         public bool CanEatCoin(CoinType coinType)
         {
+            bool eatsBigOnly = currentMask.GetCfg().OnlyEatBigCoin;
             if (coinType == CoinType.Big)
-                return currentMask == MaskType.Tiger;
-            return currentMask != MaskType.Tiger;
+                return eatsBigOnly;
+            return !eatsBigOnly;
         }
 
         /// <summary> 吃人者 A 调用：A 眩晕、偷 B 的分数，B 扣分、方向反向并被弹开。不摘面具。 </summary>
