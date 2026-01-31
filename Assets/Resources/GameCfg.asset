@@ -15,7 +15,10 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects: []
+    ReferencedUnityObjects:
+    - {fileID: -7136673967338131891, guid: 79291029de6e5cd41ac1e9455f48d456, type: 3}
+    - {fileID: 4143598101872524988, guid: 9be6d50e2f328ac45a93376ab54db581, type: 3}
+    - {fileID: -4115059098874668589, guid: 705193d5e76cd2f468553c4d8b5ed36b, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -142,8 +145,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: MaskSprite
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 0
     - Name: MaskIcon
       Entry: 6
       Data: 
@@ -221,8 +224,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: MaskSprite
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 1
     - Name: MaskIcon
       Entry: 6
       Data: 
@@ -297,8 +300,8 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: MaskIcon
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 2
     - Name: Speed
       Entry: 4
       Data: 4
