@@ -427,9 +427,10 @@ namespace GGJ
             return best;
         }
 
-        /// <summary> 吃人者 A 调用：A 眩晕、偷 B 的分数，B 扣分，B 重新选择逃离方向（短距离无墙）并更新朝向。不摘面具、不位移推开。 </summary>
+        /// <summary> 吃人者 A 调用：A 眩晕、偷 B 的分数，B 扣分，B 重新选择逃离方向（短距离无墙）并更新朝向。不摘面具、不位移推开。眩晕中不能吃人。 </summary>
         public void DoEat(PlayerController other)
         {
+            if (IsStunned) return;
             var cfg = GameCfg.Instance;
             float stealAmount = other.curScore * cfg.EatStealRatio;
             stealAmount = Mathf.Min(stealAmount, other.curScore);
