@@ -11,8 +11,8 @@ namespace GGJ
     public class MaskAIController : MonoBehaviour
     {
         [Header("决策间隔")]
-        [Tooltip("移动决策间隔(秒)，避免每帧抖动")]
-        public float thinkInterval = 0.15f;
+        [Tooltip("移动决策间隔(秒)，越大越不频繁换向")]
+        public float thinkInterval = 0.28f;
         [Tooltip("发射/切换的思考间隔(秒)")]
         public float actionThinkInterval = 0.4f;
 
@@ -27,9 +27,11 @@ namespace GGJ
         public float fireMaxRange = 6f;
 
         [Header("随机")]
-        [Tooltip("无目标时随机换向概率(每 thinkInterval)")]
+        [Tooltip("无目标时随机换向概率(每 thinkInterval)，越小越少在角落里打转")]
         [Range(0f, 1f)]
-        public float wanderChance = 0.3f;
+        public float wanderChance = 0.1f;
+        [Tooltip("闲逛方向最少保持时间(秒)，期间不随机换向")]
+        public float wanderMinHoldTime = 1.2f;
         [Tooltip("随机切换面具概率(每 actionThinkInterval)")]
         [Range(0f, 1f)]
         public float switchMaskChance = 0.08f;
@@ -46,6 +48,7 @@ namespace GGJ
         private float _nextThinkTime;
         private float _nextActionThinkTime;
         private Direction _wanderDir;
+        private float _lastWanderRollTime;
         private Vector2 _lastPosition;
         private float _lastStuckCheckTime;
         private static readonly Direction[] Cardinals = { Direction.Up, Direction.Down, Direction.Left, Direction.Right };
@@ -61,6 +64,7 @@ namespace GGJ
         {
             _lastPosition = _pc != null ? (Vector2)_pc.transform.position : Vector2.zero;
             _lastStuckCheckTime = Time.time;
+            _lastWanderRollTime = Time.time;
         }
 
         private void Update()
@@ -174,13 +178,17 @@ namespace GGJ
                 }
             }
 
-            // 5. 闲逛
-            if (Random.value < wanderChance)
+            // 5. 闲逛：隔一段时间才允许随机换向，减少角落里反复打转
+            float timeSinceRoll = Time.time - _lastWanderRollTime;
+            if (timeSinceRoll >= wanderMinHoldTime && Random.value < wanderChance)
+            {
                 _wanderDir = Cardinals[Random.Range(0, Cardinals.Length)];
+                _lastWanderRollTime = Time.time;
+            }
             return EnsureDirectionNotBlocked(_wanderDir);
         }
 
-        /// <summary> 若 dir 方向有墙则从可通行方向中选一个（优先接近原方向），避免顶墙不动。 </summary>
+        /// <summary> 若 dir 方向有墙则从可通行方向中选一个；优先保持当前移动方向，避免在角落里来回切换。 </summary>
         private Direction EnsureDirectionNotBlocked(Direction dir)
         {
             float checkDist = wallCheckDistance * Utils.GridSize;
@@ -189,6 +197,10 @@ namespace GGJ
 
             bool blocked(Direction d) => Utils.HasWallInDirection(me, d, checkDist, ignore);
             if (!blocked(dir)) return dir;
+
+            // 被墙挡住时优先保持当前方向，避免每帧在「左/上」之间来回切
+            Direction cur = _pc.curDirection;
+            if (cur != Direction.None && !blocked(cur)) return cur;
 
             var preferred = dir.GetVec();
             Direction best = Direction.None;
