@@ -16,7 +16,7 @@ namespace GGJ
             PlayerUIList[idx].Init(pc);
         }
         
-        protected override void Awake()
+        void Start()
         {
             ReloadBtn.onClick.AddListener(() => GameManager.Instance.Reload());
         }

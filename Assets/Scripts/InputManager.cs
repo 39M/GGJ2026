@@ -9,7 +9,7 @@ namespace GGJ
     {
         public InputSystem_Actions InputSystemActions;
 
-        private void Awake()
+        private void Start()
         {
             InitInput();
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,7 +16,7 @@ namespace GGJ
             return PlayerList[idx];
         }
         
-        protected override void Awake()
+        private void Start()
         {
             var idx = 0;
             foreach (var start in PlayerStart)
