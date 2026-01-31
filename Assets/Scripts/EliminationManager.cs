@@ -285,13 +285,25 @@ namespace GGJ
             // 从存活列表移除
             _alivePlayers.Remove(player);
             
-            // 播放踢飞效果（状态变更在协程内执行）
-            StartCoroutine(EliminateEffect(player));
+            // 播放踢飞效果并在效果结束后检查是否游戏结束，
+            // 如果只剩一名玩家，则在踢飞流程结束后触发结束流程（镜头聚焦获胜者并弹出结算）
+            StartCoroutine(EliminateAndCheckEnd(player));
+        }
+
+        /// <summary>
+        /// 执行淘汰流程并在踢飞效果完成后检查并结束游戏（如果需要）
+        /// </summary>
+        private IEnumerator EliminateAndCheckEnd(PlayerController player)
+        {
+            // 等待踢飞效果完成
+            yield return StartCoroutine(EliminateEffect(player));
             
-            // 检查游戏是否结束
+            // 如果只剩一名玩家，则直接结束游戏（EndGame 会处理镜头聚焦与结算界面）
             if (_alivePlayers.Count <= 1)
             {
-                StartCoroutine(DelayedEndGame(freezeDuration + zoomOutDuration + 0.5f));
+                // 小幅延迟确保画面稳定，然后结束游戏
+                yield return new WaitForSecondsRealtime(0.2f);
+                EndGame();
             }
         }
         
@@ -308,6 +320,12 @@ namespace GGJ
             player.SetEliminated(true);
             
             OnPlayerEliminated?.Invoke(player.PlayerIdx);
+            
+            // 检测如果只有一位玩家，则停止事件系统（阻止新的游戏事件）
+            if (_alivePlayers.Count <= 1)
+            {
+                GameEventManager.Instance?.StopGameEventManager();
+            }
         }
         
         /// <summary>
@@ -408,15 +426,6 @@ namespace GGJ
         }
         
         /// <summary>
-        /// 延迟结束游戏
-        /// </summary>
-        private IEnumerator DelayedEndGame(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            EndGame();
-        }
-        
-        /// <summary>
         /// 结束游戏
         /// </summary>
         private void EndGame()
@@ -425,10 +434,7 @@ namespace GGJ
             
             IsGameOver = true;
             
-            // 确保时间缩放恢复正常
-            ResetTimeScale();
-            
-            // 停止事件系统
+            // 停止事件系统（阻止新的游戏事件）
             GameEventManager.Instance?.StopGameEventManager();
             
             // 确定获胜者
@@ -452,8 +458,58 @@ namespace GGJ
             int winnerIndex = Winner != null ? Winner.PlayerIdx : -1;
             OnGameOver?.Invoke(winnerIndex);
             
-            // 显示结算界面
+            // 如果有获胜者且存在主摄像机，先执行镜头拉近 + 定格，然后弹出结算界面；否则直接弹出
+            if (Winner != null && Camera.main != null)
+            {
+                StartCoroutine(EndGameCinematicAndShowResult(Winner, winnerIndex));
+            }
+            else
+            {
+                // 直接显示结算界面（无获胜者或无主摄像机）
+                ResetTimeScale();
+                UIManager.Instance?.ShowGameResult(winnerIndex);
+            }
+        }
+
+        /// <summary>
+        /// 结算镜头序列：镜头拉近到获胜者，定格若干秒，然后弹出结算界面
+        /// </summary>
+        private IEnumerator EndGameCinematicAndShowResult(PlayerController winner, int winnerIndex)
+        {
+            var mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                ResetTimeScale();
+                UIManager.Instance?.ShowGameResult(winnerIndex);
+                yield break;
+            }
+
+            Vector3 originalCameraPos = mainCamera.transform.position;
+            float originalSize = mainCamera.orthographicSize;
+
+            // 镜头拉近到获胜者位置（使用无视时间缩放的更新）
+            Vector3 targetCameraPos = new Vector3(winner.transform.position.x, winner.transform.position.y, mainCamera.transform.position.z);
+            mainCamera.transform.DOMove(targetCameraPos, zoomInDuration).SetUpdate(true).SetEase(Ease.OutCubic);
+            mainCamera.DOOrthoSize(zoomInSize, zoomInDuration).SetUpdate(true).SetEase(Ease.OutCubic);
+
+            // 画面定格（暂停游戏逻辑）
+            Time.timeScale = 0f;
+            Time.fixedDeltaTime = 0f;
+
+            // 等待真实时间的定格时长
+            yield return new WaitForSecondsRealtime(freezeDuration);
+
+            // 在弹出 UI 前恢复时间缩放，以确保 UI 的动画可以正常播放（但游戏逻辑已停止）
+            Time.timeScale = 1f;
+            Time.fixedDeltaTime = 0.02f;
+
+            // 弹出结算界面
             UIManager.Instance?.ShowGameResult(winnerIndex);
+
+            // 如果想在结算界面后再将镜头移回原位，可以在这里添加拉回逻辑（使用 SetUpdate(true)）
+            // mainCamera.transform.DOMove(originalCameraPos, zoomOutDuration).SetUpdate(true).SetEase(Ease.OutCubic);
+            // mainCamera.DOOrthoSize(originalSize, zoomOutDuration).SetUpdate(true).SetEase(Ease.OutCubic);
+            yield break;
         }
         
         /// <summary>
