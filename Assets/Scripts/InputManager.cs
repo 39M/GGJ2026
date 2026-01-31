@@ -88,19 +88,19 @@ namespace GGJ
             InputSystemActions.Player_2.Attack.started += ctx => OnAttackInput(ctx, 1);
             InputSystemActions.Player_2.Switch.started += ctx => OnSwitchInput(ctx, 1);
 
-            InputSystemActions.Player_3.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 1);
-            InputSystemActions.Player_3.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 1);
-            InputSystemActions.Player_3.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 1);
-            InputSystemActions.Player_3.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 1);
-            InputSystemActions.Player_3.Attack.started += ctx => OnAttackInput(ctx, 1);
-            InputSystemActions.Player_3.Switch.started += ctx => OnSwitchInput(ctx, 1);
+            InputSystemActions.Player_3.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 2);
+            InputSystemActions.Player_3.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 2);
+            InputSystemActions.Player_3.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 2);
+            InputSystemActions.Player_3.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 2);
+            InputSystemActions.Player_3.Attack.started += ctx => OnAttackInput(ctx, 2);
+            InputSystemActions.Player_3.Switch.started += ctx => OnSwitchInput(ctx, 2);
 
-            InputSystemActions.Player_4.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 1);
-            InputSystemActions.Player_4.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 1);
-            InputSystemActions.Player_4.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 1);
-            InputSystemActions.Player_4.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 1);
-            InputSystemActions.Player_4.Attack.started += ctx => OnAttackInput(ctx, 1);
-            InputSystemActions.Player_4.Switch.started += ctx => OnSwitchInput(ctx, 1);
+            InputSystemActions.Player_4.Up.started += ctx => OnMoveInput(ctx, Direction.Up, 3);
+            InputSystemActions.Player_4.Down.started += ctx => OnMoveInput(ctx, Direction.Down, 3);
+            InputSystemActions.Player_4.Left.started += ctx => OnMoveInput(ctx, Direction.Left, 3);
+            InputSystemActions.Player_4.Right.started += ctx => OnMoveInput(ctx, Direction.Right, 3);
+            InputSystemActions.Player_4.Attack.started += ctx => OnAttackInput(ctx, 3);
+            InputSystemActions.Player_4.Switch.started += ctx => OnSwitchInput(ctx, 3);
         }
 
         // 移动输入处理
