@@ -28,6 +28,9 @@ namespace GGJ
                 idx++;
             }
             
+            // 初始化淘汰管理器
+            EliminationManager.Instance.InitializePlayers();
+            
             GameEventManager.Instance.StartGameEventManager();
         }
 

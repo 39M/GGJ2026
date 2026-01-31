@@ -30,6 +30,13 @@ namespace GGJ
         public Vector3 headOffset = new Vector3(0, 1.2f, 0);
 
         public TextMeshProUGUI score;
+        
+        [Header("警告效果")]
+        [LabelText("警告图标")]
+        public GameObject warningIcon;
+        [LabelText("警告文本")]
+        public TextMeshProUGUI warningText;
+        
         [HideInInspector]
         public PlayerController pc;
 
@@ -114,6 +121,39 @@ namespace GGJ
             }
             if (score != null)
                 score.text = "Score : " + pc.curScore;
+            
+            // 更新警告状态
+            UpdateWarningState();
+        }
+        
+        /// <summary>
+        /// 更新警告状态显示
+        /// </summary>
+        private void UpdateWarningState()
+        {
+            if (pc == null) return;
+            
+            // 警告图标
+            if (warningIcon != null)
+            {
+                warningIcon.SetActive(pc.IsMarked);
+            }
+            
+            // 警告文本
+            if (warningText != null)
+            {
+                warningText.gameObject.SetActive(pc.IsMarked);
+                if (pc.IsMarked)
+                {
+                    warningText.text = "危险！下波垫底将被淘汰！";
+                }
+            }
+            
+            // 如果被淘汰，隐藏整个UI
+            if (pc.IsEliminated)
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         private void LateUpdate()

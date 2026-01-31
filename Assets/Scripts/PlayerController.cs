@@ -104,6 +104,12 @@ namespace GGJ
         public Direction curDirection = Direction.Up;
         [LabelText("当前得分")]
         public float curScore = 0;
+        
+        /// <summary> 是否被标记为垫底 </summary>
+        public bool IsMarked { get; private set; } = false;
+        
+        /// <summary> 是否已被淘汰 </summary>
+        public bool IsEliminated { get; private set; } = false;
 
         private float _stunEndTime;
         private float _dropCoinNextTime;
@@ -299,7 +305,36 @@ namespace GGJ
             name = $"Player_{PlayerIdx}";
             maskBag = new List<MaskType> { MaskType.None };
             currentWornIndex = 0;
+            IsMarked = false;
+            IsEliminated = false;
             SetCurrentMask(MaskType.None);
+            UpdateUI?.Invoke();
+        }
+        
+        /// <summary>
+        /// 设置标记状态（垫底警告）
+        /// </summary>
+        public void SetMarked(bool marked)
+        {
+            IsMarked = marked;
+            UpdateUI?.Invoke();
+        }
+        
+        /// <summary>
+        /// 设置淘汰状态
+        /// </summary>
+        public void SetEliminated(bool eliminated)
+        {
+            IsEliminated = eliminated;
+            if (eliminated)
+            {
+                // 禁用碰撞
+                var colliders = GetComponentsInChildren<Collider2D>();
+                foreach (var col in colliders)
+                {
+                    col.enabled = false;
+                }
+            }
             UpdateUI?.Invoke();
         }
 
