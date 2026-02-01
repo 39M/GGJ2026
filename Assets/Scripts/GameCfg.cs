@@ -129,7 +129,7 @@ namespace GGJ
         public float EatStealRatio = 0.5f;
         
         [TabGroup("基础配置")]
-        [LabelText("吃人者眩晕时间(秒)")]
+        [LabelText("眩晕时间(秒)，")]
         public float EatStunDuration = 1.5f;
         
         [TabGroup("基础配置")]

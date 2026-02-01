@@ -169,7 +169,10 @@ namespace GGJ
         private float _lastFireMaskTime = -999f;
 
         public bool IsStunned => Time.time < _stunEndTime;
-        public Vector2 FinalSpeed => IsStunned ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
+        /// <summary> 为 true 时禁止移动/切面具/丢面具等所有输入；眩晕时自动为 true，也可由脚本设置（如 UI 打开时）。 </summary>
+        public bool BlockInputByScript { get; set; }
+        public bool BlockAllInput => IsStunned || BlockInputByScript;
+        public Vector2 FinalSpeed => BlockAllInput ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
 
         public Action UpdateUI;
 
@@ -278,6 +281,7 @@ namespace GGJ
 
         public void SwitchMask()
         {
+            if (BlockAllInput) return;
             if (maskBag == null || maskBag.Count == 0) return;
             if (currentMask != MaskType.None && currentMask.GetCfg().CanFly && IsOverlappingWall())
                 return;
@@ -318,6 +322,7 @@ namespace GGJ
         
         public void SetInput(Direction dir)
         {
+            if (BlockAllInput) return;
             curDirection = dir;
             var vec = dir.GetVec();
             //transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90);
@@ -345,6 +350,7 @@ namespace GGJ
         /// <summary> 发射当前戴的面具。 </summary>
         public void FireMask()
         {
+            if (BlockAllInput) return;
             if (currentMask == MaskType.None) return;
             float cd = GameCfg.Instance.FireMaskCooldown;
             if (cd > 0f && Time.time - _lastFireMaskTime < cd) return;
