@@ -49,6 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GGJ.Coin
   coinType: 0
   score: 10
+  anim: {fileID: 0}
 --- !u!58 &4564448045699360701
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -84,7 +85,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.8
+  m_Radius: 0.4
 --- !u!111 &6309167468646248652
 Animation:
   m_ObjectHideFlags: 0
@@ -130,7 +131,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1960967474606916325}
