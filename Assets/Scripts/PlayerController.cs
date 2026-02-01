@@ -29,13 +29,13 @@ namespace GGJ
     {
         public const float GridSize = 1; 
         
-        private static Dictionary<Direction, Vector2> DirMap = new()
+        private static Dictionary<Direction, Vector2Int> DirMap = new()
         {
-            [Direction.None] = new Vector2(0, 0),
-            [Direction.Up] = new Vector2(0, 1),
-            [Direction.Down] = new Vector2(0, -1),
-            [Direction.Left] = new Vector2(-1, 0),
-            [Direction.Right] = new Vector2(1, 0),
+            [Direction.None] = new Vector2Int(0, 0),
+            [Direction.Up] = new Vector2Int(0, 1),
+            [Direction.Down] = new Vector2Int(0, -1),
+            [Direction.Left] = new Vector2Int(-1, 0),
+            [Direction.Right] = new Vector2Int(1, 0),
         };
 
         public static void SetAllLayer(this GameObject target, int layer)
@@ -52,6 +52,11 @@ namespace GGJ
         }
         
         public static Vector2 GetVec(this Direction dir)
+        {
+            return DirMap[dir];
+        }
+        
+        public static Vector2Int GetVecInt(this Direction dir)
         {
             return DirMap[dir];
         }
@@ -146,6 +151,24 @@ namespace GGJ
             }
             return false;
         }
+
+        public static Vector2Int ToGrid(this Vector3 pos)
+        {
+            return MapScanner.Instance.WorldToGridPosition(pos);
+        }
+        
+        public static Vector2 ToGridAlignedPos(this Vector3 pos)
+        {
+            var mapScanner = MapScanner.Instance;
+            var gridPos = mapScanner.WorldToGridPosition(pos);
+            var alignedPos = mapScanner.GetCellCenterWorld(gridPos.x, gridPos.y);
+            return alignedPos;
+        }
+        
+        public static bool CanMove(Vector2Int cur, Direction dir)
+        {
+            return MapScanner.Instance.AreCellsConnected(cur.x, cur.y, cur.x + (int)dir.GetVec().x, cur.y + (int)dir.GetVec().y);
+        }
     }
     
 
@@ -183,6 +206,8 @@ namespace GGJ
         public Direction curDirection = Direction.Up;
         [LabelText("当前得分")]
         public float curScore = 0;
+        public Vector2Int CurGrid => transform.position.ToGrid();
+        public Vector2Int NextGrid => CurGrid + curDirection.GetVecInt();
         
         /// <summary> 是否被标记为垫底 </summary>
         public bool IsMarked { get; private set; } = false;
