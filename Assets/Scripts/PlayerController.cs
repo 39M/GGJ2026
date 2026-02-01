@@ -397,13 +397,12 @@ namespace GGJ
             return currentMask.GetCfg().CanEat.Contains(other.currentMask);
         }
 
-        /// <summary> 当前面具能否吃该类型金币：由 MaskCfg.OnlyEatBigCoin 配置，勾选则只吃大金币，否则只吃小金币。 </summary>
+        /// <summary> 当前面具能否吃该类型金币：由 MaskCfg.CanEatBigCoin / CanEatSmallCoin 配置。 </summary>
         public bool CanEatCoin(CoinType coinType)
         {
-            bool eatsBigOnly = currentMask.GetCfg().OnlyEatBigCoin;
-            if (coinType == CoinType.Big)
-                return eatsBigOnly;
-            return !eatsBigOnly;
+            var cfg = currentMask.GetCfg();
+            if (coinType == CoinType.Big) return cfg.CanEatBigCoin;
+            return cfg.CanEatSmallCoin;
         }
 
         [Tooltip("被吃后逃离方向检测墙的射线长度(格)，该距离内有墙则该方向不选。")]

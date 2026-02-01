@@ -27,8 +27,10 @@ namespace GGJ
         public bool CanFly;
         [LabelText("能吃")] 
         public List<MaskType> CanEat;
-        [LabelText("只能吃大金币")]
-        public bool OnlyEatBigCoin;
+        [LabelText("能吃大金币")]
+        public bool CanEatBigCoin = true;
+        [LabelText("能吃小金币")]
+        public bool CanEatSmallCoin = true;
 
         [LabelText("掉落金币间隔(秒)，0=不掉落")]
         public float DropCoinInterval;
