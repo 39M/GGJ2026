@@ -73,26 +73,54 @@ namespace GGJ
             return GameCfg.Instance.GetMaskCfg(mask);
         }
 
-        /// <summary> 在给定中心附近找一个空地：该点无碰撞体，且该点周围半径内无墙，避免掉落物/面具与墙重叠。 </summary>
-        /// <param name="center">中心点</param>
+        /// <summary> 在给定中心附近找一个空地：用 MapScanner 将候选点吸附到网格中心，该点无碰撞体且周围半径内无墙；无 MapScanner 时回退到简单网格。 </summary>
+        /// <param name="center">中心点（世界坐标）</param>
         /// <param name="wallCheckRadius">候选点周围检测墙的半径，需略大于掉落物碰撞体（如面具约 0.5）</param>
         public static Vector2 FindNearbyEmptyPosition(Vector2 center, float wallCheckRadius = 0.5f)
         {
+            var scanner = MapScanner.Instance;
+            if (scanner == null || scanner.mapData == null)
+                return FindNearbyEmptyPositionFallback(center, wallCheckRadius);
+
+            var baseGrid = scanner.WorldToGridPosition(center);
+            var gridOffsets = new[]
+            {
+                (0, 0),
+                (1, 0), (-1, 0), (0, 1), (0, -1),
+                (1, 1), (-1, 1), (1, -1), (-1, -1),
+                (2, 0), (-2, 0), (0, 2), (0, -2),
+            };
+            foreach (var (dx, dy) in gridOffsets)
+            {
+                var p = scanner.GetCellCenterWorld(baseGrid.x + dx, baseGrid.y + dy);
+                if (Physics2D.OverlapPoint(p)) continue;
+                if (HasWallWithinRadius(p, wallCheckRadius)) continue;
+                return p;
+            }
+            return scanner.GetCellCenterWorld(baseGrid.x + 1, baseGrid.y);
+        }
+
+        private static Vector2 FindNearbyEmptyPositionFallback(Vector2 center, float wallCheckRadius)
+        {
             var grid = GridSize;
+            int gx = Mathf.FloorToInt(center.x / grid);
+            int gy = Mathf.FloorToInt(center.y / grid);
+            var baseCenter = new Vector2((gx + 0.5f) * grid, (gy + 0.5f) * grid);
             var offsets = new[]
             {
+                new Vector2(0, 0),
                 new Vector2(grid, 0), new Vector2(-grid, 0), new Vector2(0, grid), new Vector2(0, -grid),
                 new Vector2(grid, grid), new Vector2(-grid, grid), new Vector2(grid, -grid), new Vector2(-grid, -grid),
                 new Vector2(2 * grid, 0), new Vector2(-2 * grid, 0), new Vector2(0, 2 * grid), new Vector2(0, -2 * grid),
             };
             foreach (var off in offsets)
             {
-                var p = center + off;
+                var p = baseCenter + off;
                 if (Physics2D.OverlapPoint(p)) continue;
                 if (HasWallWithinRadius(p, wallCheckRadius)) continue;
                 return p;
             }
-            return center + new Vector2(grid, 0);
+            return baseCenter + new Vector2(grid, 0);
         }
 
         /// <summary> 该点半径内是否存在墙（Tag=Wall）。 </summary>
