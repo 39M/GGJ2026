@@ -118,6 +118,19 @@ namespace GGJ
             }
             return false;
         }
+
+        public static Vector2 ToGridPos(Vector2 pos)
+        {
+            var mapScanner = MapScanner.Instance;
+            var gridPos = mapScanner.WorldToGridPosition(pos);
+            var alignedPos = mapScanner.GetCellCenterWorld(gridPos.x, gridPos.y);
+            return alignedPos;
+        }
+        
+        public static bool CanMove(Vector2Int cur, Direction dir)
+        {
+            return MapScanner.Instance.AreCellsConnected(cur.x, cur.y, cur.x + (int)dir.GetVec().x, cur.y + (int)dir.GetVec().y);
+        }
     }
     
 
