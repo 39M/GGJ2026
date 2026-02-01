@@ -36,6 +36,8 @@ namespace GGJ
         public float DropCoinInterval;
         [LabelText("每次掉落金币数(分数)")]
         public float DropCoinAmount;
+        [LabelText("掉落金币Prefab(不填则用全局CoinPrefab，功能与场景金币一致)")]
+        public Coin DropCoinPrefab;
 
         public LayerMask Layer => CanFly ? LayerMask.NameToLayer("Bird") : LayerMask.NameToLayer("Default");
     }

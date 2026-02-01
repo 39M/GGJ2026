@@ -490,7 +490,7 @@ namespace GGJ
             float amount = Mathf.Min(cfg.DropCoinAmount, curScore);
             if (amount <= 0f) return;
             var pos = Utils.FindNearbyEmptyPosition((Vector2)transform.position);
-            var prefab = GameCfg.Instance.CoinPrefab;
+            var prefab = cfg.DropCoinPrefab != null ? cfg.DropCoinPrefab : GameCfg.Instance.CoinPrefab;
             if (prefab == null) return;
             var coinObj = Instantiate(prefab.gameObject, pos, Quaternion.identity);
             var coin = coinObj.GetComponent<Coin>();
