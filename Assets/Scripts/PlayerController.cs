@@ -163,11 +163,16 @@ namespace GGJ
         public bool IsEliminated { get; private set; } = false;
 
         private float _stunEndTime;
+        private float _stunStartTime;
+        private float _stunShakeBaseZ;
         private float _dropCoinNextTime;
         private float _lastFireMaskTime = -999f;
 
         public bool IsStunned => Time.time < _stunEndTime;
-        public Vector2 FinalSpeed => IsStunned ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
+        /// <summary> 为 true 时禁止移动/切面具/丢面具等所有输入；眩晕时自动为 true，也可由脚本设置（如 UI 打开时）。 </summary>
+        public bool BlockInputByScript { get; set; }
+        public bool BlockAllInput => IsStunned || BlockInputByScript;
+        public Vector2 FinalSpeed => BlockAllInput ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
 
         public Action UpdateUI;
 
@@ -276,6 +281,7 @@ namespace GGJ
 
         public void SwitchMask()
         {
+            if (BlockAllInput) return;
             if (maskBag == null || maskBag.Count == 0) return;
             if (currentMask != MaskType.None && currentMask.GetCfg().CanFly && IsOverlappingWall())
                 return;
@@ -306,13 +312,17 @@ namespace GGJ
             UpdateUI?.Invoke();
         }
 
-        private void StartStun(float duration)
+        /// <summary> 进入眩晕（吃人/被面具命中等统一调用），时长与吃人一致用 GameCfg.EatStunDuration；会触发摇晃特效。 </summary>
+        public void StartStun(float duration)
         {
             _stunEndTime = Time.time + duration;
+            _stunStartTime = Time.time;
+            _stunShakeBaseZ = transform.eulerAngles.z;
         }
         
         public void SetInput(Direction dir)
         {
+            if (BlockAllInput) return;
             curDirection = dir;
             var vec = dir.GetVec();
             //transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90);
@@ -340,6 +350,7 @@ namespace GGJ
         /// <summary> 发射当前戴的面具。 </summary>
         public void FireMask()
         {
+            if (BlockAllInput) return;
             if (currentMask == MaskType.None) return;
             float cd = GameCfg.Instance.FireMaskCooldown;
             if (cd > 0f && Time.time - _lastFireMaskTime < cd) return;
@@ -397,13 +408,12 @@ namespace GGJ
             return currentMask.GetCfg().CanEat.Contains(other.currentMask);
         }
 
-        /// <summary> 当前面具能否吃该类型金币：由 MaskCfg.OnlyEatBigCoin 配置，勾选则只吃大金币，否则只吃小金币。 </summary>
+        /// <summary> 当前面具能否吃该类型金币：由 MaskCfg.CanEatBigCoin / CanEatSmallCoin 配置。 </summary>
         public bool CanEatCoin(CoinType coinType)
         {
-            bool eatsBigOnly = currentMask.GetCfg().OnlyEatBigCoin;
-            if (coinType == CoinType.Big)
-                return eatsBigOnly;
-            return !eatsBigOnly;
+            var cfg = currentMask.GetCfg();
+            if (coinType == CoinType.Big) return cfg.CanEatBigCoin;
+            return cfg.CanEatSmallCoin;
         }
 
         [Tooltip("被吃后逃离方向检测墙的射线长度(格)，该距离内有墙则该方向不选。")]
@@ -491,7 +501,7 @@ namespace GGJ
             float amount = Mathf.Min(cfg.DropCoinAmount, curScore);
             if (amount <= 0f) return;
             var pos = Utils.FindNearbyEmptyPosition((Vector2)transform.position);
-            var prefab = GameCfg.Instance.CoinPrefab;
+            var prefab = cfg.DropCoinPrefab != null ? cfg.DropCoinPrefab : GameCfg.Instance.CoinPrefab;
             if (prefab == null) return;
             var coinObj = Instantiate(prefab.gameObject, pos, Quaternion.identity);
             var coin = coinObj.GetComponent<Coin>();
@@ -509,6 +519,18 @@ namespace GGJ
         private void Update()
         {
             TryDropCoinByMask();
+            if (IsStunned)
+            {
+                float elapsed = Time.time - _stunStartTime;
+                float shake = Mathf.Sin(elapsed * 50f) * 6f;
+                transform.rotation = Quaternion.Euler(0f, 0f, _stunShakeBaseZ + shake);
+            }
+            else
+            {
+                var vec = curDirection.GetVec();
+                if (vec.sqrMagnitude > 0.01f)
+                    transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90f);
+            }
         }
 
         private void OnCollisionEnter2D(Collision2D other)

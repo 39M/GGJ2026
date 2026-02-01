@@ -70,7 +70,7 @@ namespace GGJ
         private void Update()
         {
             if (_pc == null) return;
-            if (_pc.IsStunned) return;
+            if (_pc.BlockAllInput) return;
 
             float t = Time.time;
             if (t >= _nextThinkTime)

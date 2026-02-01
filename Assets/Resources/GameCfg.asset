@@ -19,6 +19,7 @@ MonoBehaviour:
     - {fileID: -7136673967338131891, guid: 163329ced213be244beee82222d11d69, type: 3}
     - {fileID: 4143598101872524988, guid: 8c50fe1498f30684b90066914411d9e8, type: 3}
     - {fileID: -4115059098874668589, guid: 65e1bf3908be5d04d9f3bc3ed598893f, type: 3}
+    - {fileID: 6317235755775435011, guid: 00dda75df64a7a642a6e382d50821b17, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -102,15 +103,21 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: OnlyEatBigCoin
+    - Name: CanEatBigCoin
       Entry: 5
-      Data: false
+      Data: true
+    - Name: CanEatSmallCoin
+      Entry: 5
+      Data: true
     - Name: DropCoinInterval
       Entry: 4
       Data: 0
     - Name: DropCoinAmount
       Entry: 4
       Data: 0
+    - Name: DropCoinPrefab
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -181,7 +188,10 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: OnlyEatBigCoin
+    - Name: CanEatBigCoin
+      Entry: 5
+      Data: true
+    - Name: CanEatSmallCoin
       Entry: 5
       Data: true
     - Name: DropCoinInterval
@@ -190,6 +200,9 @@ MonoBehaviour:
     - Name: DropCoinAmount
       Entry: 4
       Data: 0
+    - Name: DropCoinPrefab
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -254,15 +267,21 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: OnlyEatBigCoin
+    - Name: CanEatBigCoin
       Entry: 5
-      Data: false
+      Data: true
+    - Name: CanEatSmallCoin
+      Entry: 5
+      Data: true
     - Name: DropCoinInterval
       Entry: 4
       Data: 0
     - Name: DropCoinAmount
       Entry: 4
       Data: 0
+    - Name: DropCoinPrefab
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -327,7 +346,10 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: OnlyEatBigCoin
+    - Name: CanEatBigCoin
+      Entry: 5
+      Data: false
+    - Name: CanEatSmallCoin
       Entry: 5
       Data: false
     - Name: DropCoinInterval
@@ -336,6 +358,9 @@ MonoBehaviour:
     - Name: DropCoinAmount
       Entry: 4
       Data: 5
+    - Name: DropCoinPrefab
+      Entry: 10
+      Data: 3
     - Name: 
       Entry: 8
       Data: 

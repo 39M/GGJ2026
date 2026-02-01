@@ -106,6 +106,9 @@ namespace GGJ
                 return;
             }
 
+            if (_isFired)
+                pc.StartStun(GameCfg.Instance.EatStunDuration);
+
             Debug.Log($"MaskObject: Picked up by player {pc.name} using {(isLargeCollider ? "LargeCollider" : "SmallCollider")}");
             if (owner == null) pc.GetMask(mask); else pc.HurtMask(mask);
             Destroy(gameObject);
