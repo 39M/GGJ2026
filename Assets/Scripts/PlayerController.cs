@@ -163,6 +163,8 @@ namespace GGJ
         public bool IsEliminated { get; private set; } = false;
 
         private float _stunEndTime;
+        private float _stunStartTime;
+        private float _stunShakeBaseZ;
         private float _dropCoinNextTime;
         private float _lastFireMaskTime = -999f;
 
@@ -306,9 +308,12 @@ namespace GGJ
             UpdateUI?.Invoke();
         }
 
-        private void StartStun(float duration)
+        /// <summary> 进入眩晕（吃人/被面具命中等统一调用），时长与吃人一致用 GameCfg.EatStunDuration；会触发摇晃特效。 </summary>
+        public void StartStun(float duration)
         {
             _stunEndTime = Time.time + duration;
+            _stunStartTime = Time.time;
+            _stunShakeBaseZ = transform.eulerAngles.z;
         }
         
         public void SetInput(Direction dir)
@@ -508,6 +513,18 @@ namespace GGJ
         private void Update()
         {
             TryDropCoinByMask();
+            if (IsStunned)
+            {
+                float elapsed = Time.time - _stunStartTime;
+                float shake = Mathf.Sin(elapsed * 50f) * 6f;
+                transform.rotation = Quaternion.Euler(0f, 0f, _stunShakeBaseZ + shake);
+            }
+            else
+            {
+                var vec = curDirection.GetVec();
+                if (vec.sqrMagnitude > 0.01f)
+                    transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg - 90f);
+            }
         }
 
         private void OnCollisionEnter2D(Collision2D other)
