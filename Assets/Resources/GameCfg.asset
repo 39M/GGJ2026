@@ -53,7 +53,7 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: 2|GGJ.MaskCfg, Assembly-CSharp
-    - Name: TestColor
+    - Name: MainColor
       Entry: 7
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
@@ -126,18 +126,18 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: 4|GGJ.MaskCfg, Assembly-CSharp
-    - Name: TestColor
+    - Name: MainColor
       Entry: 7
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.7607844
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.164705887
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.08235294
     - Name: 
       Entry: 4
       Data: 1
@@ -205,18 +205,18 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: 6|GGJ.MaskCfg, Assembly-CSharp
-    - Name: TestColor
+    - Name: MainColor
       Entry: 7
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.172549024
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.533333361
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.21960786
     - Name: 
       Entry: 4
       Data: 1
@@ -278,18 +278,18 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: 8|GGJ.MaskCfg, Assembly-CSharp
-    - Name: TestColor
+    - Name: MainColor
       Entry: 7
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.4901961
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0.8196079
     - Name: 
       Entry: 4
       Data: 1
@@ -357,9 +357,10 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   BigCoinPrefab: {fileID: 6317235755775435011, guid: 00dda75df64a7a642a6e382d50821b17, type: 3}
-  BulletSpeed: 40
+  GetScoreNumber: {fileID: 2560006388312618429, guid: 427c71078a58ea4449bcdc8951cdc917, type: 3}
+  BulletSpeed: 16
   FireMaskCooldown: 0.5
-  FiredByPickupBlockDuration: 2
+  FiredByPickupBlockDuration: 1
   EatStealRatio: 0.5
   EatStunDuration: 1.5
   EatPushDistance: 2

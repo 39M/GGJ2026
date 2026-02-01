@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using DamageNumbersPro;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace GGJ
 {
@@ -9,8 +11,8 @@ namespace GGJ
     [Serializable,HideReferenceObjectPicker,HideLabel]
     public class MaskCfg
     {
-        [LabelText("测试颜色")]
-        public Color TestColor = Color.white;
+        [FormerlySerializedAs("TestColor")] [LabelText("主颜色")]
+        public Color MainColor = Color.white;
         [LabelText("面具图片(场景/玩家戴面具时显示，不填则沿用预制体原有图)")]
         public Sprite MaskSprite;
         [LabelText("面具图标(UI 背包槽显示，不填则用面具图片)")]
@@ -99,6 +101,10 @@ namespace GGJ
         [TabGroup("基础配置")]
         [LabelText("大金币Prefab")]
         public Coin BigCoinPrefab;
+
+        [TabGroup("基础配置")]
+        [LabelText("获得分数眺字")]
+        public DamageNumber GetScoreNumber;
         
         [TabGroup("基础配置")]
         [LabelText("发射面具速度")]

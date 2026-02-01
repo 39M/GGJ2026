@@ -16,6 +16,14 @@ namespace GGJ
         public CoinType coinType = CoinType.Small;
         [LabelText("得分")]
         public float score = 10;
+        [LabelText("动画")]
+        public Animation anim;
+        
+        private void Awake()
+        {
+            anim = GetComponent<Animation>();
+            anim.Play("Coin_Show");
+        }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
@@ -23,7 +31,9 @@ namespace GGJ
             if (pc == null) return;
             if (!pc.CanEatCoin(coinType)) return;
             pc.GetScore(score);
-            Destroy(gameObject);
+            anim.Play("Coin_Get");
+            GetComponent<Collider2D>().enabled = false;
+            Destroy(gameObject, 1);
         }
     }
 }

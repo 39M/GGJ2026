@@ -108,6 +108,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5167293954387496950, guid: 1ae183a55e78bca48a7a14d907ff902a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5a02e149db8747f4385b9daf9f435599, type: 2}
     - target: {fileID: 6149271017952120573, guid: 1ae183a55e78bca48a7a14d907ff902a, type: 3}
       propertyPath: m_Name
       value: Coin_Big

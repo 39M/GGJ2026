@@ -7,8 +7,10 @@ namespace GGJ
     public class MaskObject : MonoBehaviour
     {
         public MaskType mask;
+        public TrailRenderer trail;
         public Rigidbody2D rig;
         public SpriteRenderer mainSprite;
+        public Animation anim;
         [HideInInspector]
         public PlayerController owner;
 
@@ -31,14 +33,21 @@ namespace GGJ
             var cfg = mask.GetCfg();
             if (cfg.MaskSprite != null)
                 mainSprite.sprite = cfg.MaskSprite;
-            mainSprite.color = cfg.TestColor;
+            //mainSprite.color = cfg.MainColor;
             rig.linearVelocity = speed;
             owner = own;
             _isFired = speed.sqrMagnitude > 0.01f;
             if (_isFired)
             {
+                anim.Play("Mask_Fire");
+                trail.gameObject.SetActive(true);
+                trail.startColor = cfg.MainColor;
                 _firedTime = Time.time;
                 _firedBy = own; // 记录发射者，撞墙后也不清除，防止发射者再捡回
+            }
+            else
+            {
+                anim.Play("Mask_Show");
             }
             if (largeCollider != null)
                 largeCollider.enabled = _isFired;
@@ -59,13 +68,14 @@ namespace GGJ
             {
                 if (isLargeCollider)
                     return;
+                var dropPos = Utils.FindNearbyEmptyPosition((Vector2)transform.position - rig.linearVelocity * Time.fixedDeltaTime * 1.5f);
                 rig.linearVelocity = Vector2.zero;
                 owner = null;
                 _isFired = false;
                 if (largeCollider != null)
                     largeCollider.enabled = false;
-                var dropPos = Utils.FindNearbyEmptyPosition((Vector2)transform.position);
                 rig.MovePosition(dropPos);
+                anim.Play("Mask_Normal");
                 return;
             }
 
@@ -97,7 +107,7 @@ namespace GGJ
             }
 
             Debug.Log($"MaskObject: Picked up by player {pc.name} using {(isLargeCollider ? "LargeCollider" : "SmallCollider")}");
-            pc.GetMask(mask);
+            if (owner == null) pc.GetMask(mask); else pc.HurtMask(mask);
             Destroy(gameObject);
         }
     }

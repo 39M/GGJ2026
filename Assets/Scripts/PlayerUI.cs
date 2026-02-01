@@ -102,7 +102,7 @@ namespace GGJ
                     var mt = bag[i];
                     slot.gameObject.SetActive(true);
                     var cfg = mt == MaskType.None ? null : mt.GetCfg();
-                    var c = mt == MaskType.None ? Color.gray : cfg.TestColor;
+                    var c = mt == MaskType.None ? Color.gray : Color.white;
                     if (!isCurrent) c.a = otherSlotAlpha;
                     slot.color = c;
                     if (mt != MaskType.None && cfg != null)

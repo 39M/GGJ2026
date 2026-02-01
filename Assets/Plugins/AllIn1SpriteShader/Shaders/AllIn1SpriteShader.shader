@@ -537,7 +537,9 @@
 			#if INNEROUTLINE_ON
 			half _InnerOutlineThickness, _InnerOutlineAlpha, _InnerOutlineGlow;
 			half4 _InnerOutlineColor;
+            half _OnlyInnerOutline;
 			#endif
+
 
 			#if HOLOGRAM_ON
 			half _HologramStripesAmount, _HologramMinAlpha, _HologramUnmodAmount, _HologramStripesSpeed, _HologramMaxAlpha, _HologramBlend;
@@ -936,14 +938,18 @@
 				#if INNEROUTLINE_ON
 				half3 innerT = abs(GetPixel(0, _InnerOutlineThickness, i.uv, _MainTex) - GetPixel(0, -_InnerOutlineThickness, i.uv, _MainTex));
 				innerT += abs(GetPixel(_InnerOutlineThickness, 0, i.uv, _MainTex) - GetPixel(-_InnerOutlineThickness, 0, i.uv, _MainTex));
-				#if !ONLYINNEROUTLINE_ON
-				innerT = (innerT / 2.0) * col.a * _InnerOutlineAlpha;
-				col.rgb += length(innerT) * _InnerOutlineColor.rgb * _InnerOutlineGlow;
-				#else
+				//#if !ONLYINNEROUTLINE_ON
+            	if (_OnlyInnerOutline < 1)
+            	{
+					innerT = (innerT / 2.0) * col.a * _InnerOutlineAlpha;
+					col.rgb += length(innerT) * _InnerOutlineColor.rgb * _InnerOutlineGlow;
+            	}else{
+				//#else
 				innerT *= col.a * _InnerOutlineAlpha;
 				col.rgb = length(innerT) * _InnerOutlineColor.rgb * _InnerOutlineGlow;
 				col.a = step(0.3, col.r+col.g+col.b);
-				#endif
+            	}
+				//#endif
 				#endif
 
 				#if HITEFFECT_ON

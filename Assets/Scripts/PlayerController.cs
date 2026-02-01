@@ -125,7 +125,12 @@ namespace GGJ
     {
         public int PlayerIdx { get; private set; } = 0;
         public Rigidbody2D rig;
+        public Animation anim;
         public SpriteRenderer mainSprite;
+        public GameObject TigerMask;
+        public GameObject SheepMask;
+        public GameObject BirdMask;
+        
         
         /// <summary> 面具列表：0号位、1号位… 切换键会按 0→1→2→… 循环戴。 </summary>
         [LabelText("面具列表")]
@@ -165,6 +170,14 @@ namespace GGJ
         public Vector2 FinalSpeed => IsStunned ? Vector2.zero : (DirHasFood() ? eatSpeed : speed) * curDirection.GetVec();
 
         public Action UpdateUI;
+
+
+        public void UpdateMaskView()
+        {
+            TigerMask.SetActive(currentMask == MaskType.Tiger);
+            SheepMask.SetActive(currentMask == MaskType.Sheep);
+            BirdMask.SetActive(currentMask == MaskType.Bird);
+        }
         
         /// <summary> 把指定面具设为当前佩戴槽位并应用属性（速度、层级等）。 </summary>
         public void SetCurrentMask(MaskType mask)
@@ -181,9 +194,11 @@ namespace GGJ
             eatSpeed = cfg.EatSpeed;
             scoreMulti = cfg.Score;
             gameObject.SetAllLayer(cfg.Layer);
-            mainSprite.color = cfg.TestColor;
+            //mainSprite.color = cfg.MainColor;
             if (cfg.DropCoinInterval > 0f)
                 _dropCoinNextTime = Time.time + cfg.DropCoinInterval;
+            anim.Play(currentMask == MaskType.Bird ? "Player_Fly" : "Player_Normal");
+            UpdateMaskView();
             UpdateUI?.Invoke();
         }
 
@@ -221,6 +236,13 @@ namespace GGJ
             var pos = FindDropPositionFarEnough();
             var mask = Instantiate(GameCfg.Instance.MaskPrefab, pos, Quaternion.identity).GetComponent<MaskObject>();
             mask.Init(maskType, Vector2.zero, null);
+        }
+
+        public void HurtMask(MaskType mask)
+        {
+            GetMask(mask);
+            anim.Stop();
+            anim.Play("Player_Hurt_Mask");
         }
         
         public void GetMask(MaskType mask)
@@ -264,19 +286,23 @@ namespace GGJ
         
         public void GetScore(float s)
         {
-            curScore += s * scoreMulti;
-            UpdateUI?.Invoke();
+            AddScore(s * scoreMulti);
         }
 
         public void AddScore(float s)
         {
             curScore += s;
+            GameCfg.Instance.GetScoreNumber.Spawn(transform.position, s);
+            anim.Stop();
+            anim.Play("Player_Score");
             UpdateUI?.Invoke();
         }
 
         public void LoseScore(float s)
         {
             curScore = Mathf.Max(0f, curScore - s);
+            anim.Stop();
+            anim.Play("Player_Hurt");
             UpdateUI?.Invoke();
         }
 
@@ -497,6 +523,7 @@ namespace GGJ
         private void FixedUpdate()
         {
             rig.linearVelocity = FinalSpeed;
+            if (!anim.isPlaying) anim.Play(currentMask == MaskType.Bird ? "Player_Fly" : "Player_Normal");
         }
 
         #endregion
